@@ -1,0 +1,10 @@
+﻿  glad.c
+  glslprogram.cpp
+  glutils.cpp
+  teapot.cpp
+  torus.cpp
+  trianglemesh.cpp
+  main.cpp
+  scenebasic_uniform.cpp
+  Generating Code...
+  Project_Template.vcxproj -> C:\Users\dforeman\Documents\GitHub\COMP3015\Project_Template_Diffuse\Project_Template_Diffuse\Project_Template\x64\Debug\Project_Template.exe
