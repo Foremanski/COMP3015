@@ -36,7 +36,14 @@ void SceneBasic_Uniform::initScene()
 
     //make sure you use the correct name, check your vertex shader
     prog.setUniform("Material.Kd", 0.2f, 0.55f, 0.9f); //seting the Kd uniform
+    prog.setUniform("Material.Shininess", 0.5f);
+    prog.setUniform("Material.Ks", 0.7f, 0.7f, 0.7f);
+
     prog.setUniform("Light.Ld", 1.0f, 1.0f, 1.0f);     //setting the Ld uniform
+    prog.setUniform("Light.La", 0.5f, 0.5f, 0.5f);
+    prog.setUniform("Light.Ls", 0.5f, 0.5f, 0.5f);
+
+
     prog.setUniform("Light.Position", view * glm::vec4(5.0f, 5.0f, 2.0f, 0.0f)); //setting Light Position
 }
 

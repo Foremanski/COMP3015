@@ -12,12 +12,19 @@ uniform struct LightInfo
 {
   vec4 Position; // Light position in eye coords.
   vec3 Ld;       // Diffuse light intensity
+  vec3 La;
+  vec3 Ls;
+
+
 } Light;
 
 //material information struct
 uniform struct MaterialInfo 
 {
   vec3 Kd;      // Diffuse reflectivity
+  vec3 Ks;
+  vec3 Ka;
+  float shininess;
 } Material;
 
 //uniforms for matrices required in the shader
@@ -28,7 +35,7 @@ uniform mat4 MVP;				//model view projection matrix
 void main() 
 { 
   //transfrom normal from model coordinates to view coordinates
-  vec3 n = normalize( NormalMatrix * VertexNormal);
+  vec3 n = normalize(NormalMatrix * VertexNormal);
 
   //transform vertex position from model coordinates to view coordinates
   vec4 pos = ModelViewMatrix * vec4(VertexPosition,1.0);
@@ -42,8 +49,20 @@ void main()
   //difuse formula for light calculations
   vec3 diffuse = Light.Ld * Material.Kd * sDotN;
 
-  //pass the colour to LightIntensity which will transfer it to the fragment shader
-  LightIntensity = diffuse;
+  //reflect vector
+  vec3 r = reflect(s,n);
+
+  //viewing vector
+  vec3 v = normalize(-VertexPosition.xyz);
+
+  //ambient component
+  vec3 Ambient = Material.Ka * Light.La;
+
+  //specular component
+  vec3 Specular = Material.Ks * Light.Ls * pow(dot(r,v), Material.shininess); 
+
+  //phong calculation
+  LightIntensity = diffuse + Ambient + Specular;
 
   //turns any vertex position into model view projection in preparations to 
   //graphics pipeline processes before fragment shader (clipping)
