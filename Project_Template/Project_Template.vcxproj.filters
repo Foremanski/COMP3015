@@ -56,14 +56,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\basic_uniform.frag">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shader\basic_uniform.vert">
-      <Filter>shaders</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="helper\scene.h">
       <Filter>helper</Filter>
     </ClInclude>
@@ -106,5 +98,9 @@
     <ClInclude Include="helper\sphere.h">
       <Filter>helper</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\PhongModel.frag" />
+    <None Include="shader\PhongModel.vert" />
   </ItemGroup>
 </Project>

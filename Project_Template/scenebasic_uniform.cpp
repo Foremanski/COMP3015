@@ -35,9 +35,12 @@ void SceneBasic_Uniform::initScene()
     projection = mat4(1.0f);
 
     //make sure you use the correct name, check your vertex shader
+    /*
     prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f); //seting the Kd uniform
     prog.setUniform("Material.Ks", 0.95f, 0.95f, 0.95f);
     prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
+    */
+
     prog.setUniform("Material.Shininess", 0.5f);
     
 
@@ -52,8 +55,8 @@ void SceneBasic_Uniform::initScene()
 void SceneBasic_Uniform::compile()
 {
 	try {
-		prog.compileShader("shader/basic_uniform.vert");
-		prog.compileShader("shader/basic_uniform.frag");
+		prog.compileShader("shader/PhongModel.vert");
+		prog.compileShader("shader/PhongModel.frag");
 		prog.link();
 		prog.use();
 	} catch (GLSLProgramException &e) {
