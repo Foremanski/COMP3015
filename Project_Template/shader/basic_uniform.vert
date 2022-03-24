@@ -6,8 +6,6 @@ layout (location = 1) in vec3 VertexNormal;
 
 //out vector needed for the fragment shader
 out vec3 LightIntensity; 
-out vec3 position;
-out vec3 normal;
  
  //light information struct
 uniform struct LightInfo 
@@ -61,7 +59,7 @@ void main()
   vec3 Ambient = Material.Ka * Light.La;
 
   //specular component
-  vec3 Specular = Material.Ks * Light.Ls * pow(max(dot(r,v), 1.0), Material.shininess); 
+  vec3 Specular = Material.Ks * Light.Ls * pow(dot(r,v), Material.shininess); 
 
   //phong calculation
   LightIntensity = diffuse + Ambient + Specular;

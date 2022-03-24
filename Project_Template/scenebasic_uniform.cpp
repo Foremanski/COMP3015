@@ -35,15 +35,13 @@ void SceneBasic_Uniform::initScene()
     projection = mat4(1.0f);
 
     //make sure you use the correct name, check your vertex shader
-    prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f); //seting the Kd uniform
-    prog.setUniform("Material.Ks", 0.95f, 0.95f, 0.95f);
-    prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
+    prog.setUniform("Material.Kd", 0.2f, 0.55f, 0.9f); //seting the Kd uniform
     prog.setUniform("Material.Shininess", 0.5f);
-    
+    prog.setUniform("Material.Ks", 0.7f, 0.7f, 0.7f);
 
-    prog.setUniform("Light.Ld", 0.2f, 0.5f, 0.5f);     //setting the Ld uniform
-    prog.setUniform("Light.La", 0.1f, 0.5f, 0.7f);
-    prog.setUniform("Light.Ls", 0.5f, 0.7f, 0.5f);
+    prog.setUniform("Light.Ld", 1.0f, 1.0f, 1.0f);     //setting the Ld uniform
+    prog.setUniform("Light.La", 0.5f, 0.5f, 0.5f);
+    prog.setUniform("Light.Ls", 0.5f, 0.5f, 0.5f);
 
 
     prog.setUniform("Light.Position", view * glm::vec4(5.0f, 5.0f, 2.0f, 0.0f)); //setting Light Position
@@ -94,5 +92,3 @@ void SceneBasic_Uniform::resize(int w, int h)
     height = h;
     projection = glm::perspective(glm::radians(70.0f), (float)w / h, 0.3f, 100.0f);
 }
-
-
