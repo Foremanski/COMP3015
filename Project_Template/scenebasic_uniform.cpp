@@ -35,13 +35,14 @@ void SceneBasic_Uniform::initScene()
     projection = mat4(1.0f);
 
     //make sure you use the correct name, check your vertex shader
-    /*
+    
     prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f); //seting the Kd uniform
     prog.setUniform("Material.Ks", 0.95f, 0.95f, 0.95f);
     prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
-    */
+    
 
-    prog.setUniform("Material.Shininess", 0.5f);
+    
+    prog.setUniform("Material.Shininess", 180.0f);
     
 
     prog.setUniform("Light.Ld", 0.2f, 0.5f, 0.5f);     //setting the Ld uniform
@@ -73,8 +74,8 @@ void SceneBasic_Uniform::update( float t )
 void SceneBasic_Uniform::render()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    setMatrices(); //we set matrices 
+   
+    setMatrices();
     torus.render();     //we render the torus
     //teapot.render();  
 }
