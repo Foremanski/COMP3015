@@ -5,13 +5,13 @@ in vec3 LightIntensity;
 in vec4 position;
 in vec3 normal;
 
-//in vec2 TexCoord;
+in vec2 TexCoord;
 
 //out variable, this typical for all fragment shaders
 layout (location = 0) out vec4 FragColor;
 
 
-//layout (binding = 0) uniform sampler2D Tex1;
+layout (binding = 0) uniform sampler2D Tex1;
 
 //light information structure
 uniform struct LightInfo 
@@ -34,8 +34,11 @@ uniform struct MaterialInfo
 
 vec3 BlinnPhong(vec4 position, vec3 n, int light)
 {
+     //retrieve texture color from texture
+     vec3 texColor = texture(Tex1,TexCoord).rgb;        
+
      //ambient component
-     vec3 Ambient = Material.Ka * Light.La;   
+     vec3 Ambient = texColor * Light.La;   
 
      //calculate light direction, notice the light is already in the view coordinates 
      vec3 s = normalize(vec3(Light.Position - position));
@@ -44,7 +47,7 @@ vec3 BlinnPhong(vec4 position, vec3 n, int light)
      float sDotN = max( dot(s,n), 0.0 );
 
      //difuse formula for light calculations
-     vec3 diffuse = Light.Ld * Material.Kd * sDotN;
+     vec3 diffuse = Light.Ld * texColor * sDotN;
 
      //reflect vector
      vec3 r = reflect(-s,n);
@@ -57,10 +60,9 @@ vec3 BlinnPhong(vec4 position, vec3 n, int light)
      vec3 h = normalize(v + s);
 
      //specular component
-     vec3 Specular = Material.Ks * Light.Ls * pow(max(dot(h,n), 1.0), Material.shininess); 
+     vec3 Specular = texColor * Light.Ls * pow(max(dot(h,n), 1.0), Material.shininess); 
 
-     //retrieve texture color from texture
-     //vec3 texColor = texture(Tex1,TexCoord).rgb;         
+      
        
      //phong calculation
      vec3 LightIntensity = diffuse + Ambient + Specular;

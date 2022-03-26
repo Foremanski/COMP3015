@@ -8,6 +8,8 @@
 
 #include "helper/torus.h"
 #include "helper/teapot.h"
+#include "helper/cube.h"
+#include "helper/texture.h"
 #include <glm/glm.hpp>
 
 class SceneBasic_Uniform : public Scene
@@ -17,6 +19,8 @@ private:
     
     Torus torus;
     //Teapot teapot;
+
+    Cube cube;
 
     void setMatrices();
 

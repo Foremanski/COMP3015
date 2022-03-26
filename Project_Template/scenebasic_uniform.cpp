@@ -18,7 +18,10 @@ void SceneBasic_Uniform::initScene()
 {
     compile();
 	glEnable(GL_DEPTH_TEST);
-   
+
+    view = glm::lookAt(vec3(1.0f, 1.25f, 1.25f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+    projection = mat4(1.0f);
+
     //initialise the model matrix
     model = mat4(1.0f);
     
@@ -32,25 +35,27 @@ void SceneBasic_Uniform::initScene()
     //model = glm::rotate(model, glm::radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
     //view = glm::lookAt(vec3(2.0f, 4.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 
-    projection = mat4(1.0f);
+   
 
     //make sure you use the correct name, check your vertex shader
-    
+    /*
     prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f); //seting the Kd uniform
     prog.setUniform("Material.Ks", 0.95f, 0.95f, 0.95f);
     prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
-    
-
-    
+    */   
     prog.setUniform("Material.Shininess", 180.0f);
     
-
-    prog.setUniform("Light.Ld", 0.2f, 0.5f, 0.5f);     //setting the Ld uniform
+    //light uniforms
+    prog.setUniform("Light.Ld", 0.2f, 0.5f, 0.5f);     
     prog.setUniform("Light.La", 0.1f, 0.5f, 0.7f);
     prog.setUniform("Light.Ls", 0.5f, 0.7f, 0.5f);
+    //setting Light Position
+    prog.setUniform("Light.Position", view * glm::vec4(5.0f, 5.0f, 2.0f, 0.0f)); 
 
+    GLuint texID = Texture::loadTexture("../Project_Template/media/texture/brick1.jpg");
 
-    prog.setUniform("Light.Position", view * glm::vec4(5.0f, 5.0f, 2.0f, 0.0f)); //setting Light Position
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texID);
 }
 
 void SceneBasic_Uniform::compile()
@@ -76,7 +81,7 @@ void SceneBasic_Uniform::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    
     setMatrices();
-    torus.render();     //we render the torus
+    cube.render();     //we render the torus
     //teapot.render();  
 }
 
