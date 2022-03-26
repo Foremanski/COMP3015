@@ -46,16 +46,21 @@ void SceneBasic_Uniform::initScene()
     prog.setUniform("Material.Shininess", 180.0f);
     
     //light uniforms
-    prog.setUniform("Light.Ld", 0.2f, 0.5f, 0.5f);     
-    prog.setUniform("Light.La", 0.1f, 0.5f, 0.7f);
-    prog.setUniform("Light.Ls", 0.5f, 0.7f, 0.5f);
+    prog.setUniform("Light.Ld", 0.5f, 0.5f, 0.5f);     
+    prog.setUniform("Light.La", 0.5f, 0.5f, 0.5f);
+    prog.setUniform("Light.Ls", 0.5f, 0.5f, 0.5f);
     //setting Light Position
     prog.setUniform("Light.Position", view * glm::vec4(5.0f, 5.0f, 2.0f, 0.0f)); 
 
-    GLuint texID = Texture::loadTexture("../Project_Template/media/texture/brick1.jpg");
+
+    //load textures and bind them
+    GLuint brick = Texture::loadTexture("../Project_Template/media/texture/brick1.jpg");
+    GLuint moss = Texture::loadTexture("../Project_Template/media/texture/moss.png");
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texID);
+    glBindTexture(GL_TEXTURE_2D, brick);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, moss);
 }
 
 void SceneBasic_Uniform::compile()
