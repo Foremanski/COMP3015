@@ -35,7 +35,7 @@ uniform struct MaterialInfo
 vec3 BlinnPhong(vec4 position, vec3 n, int light)
 {
      //ambient component
-     vec3 Ambient = Ka * Light.La;   
+     vec3 Ambient = Material.Ka * Light.La;   
 
      //calculate light direction, notice the light is already in the view coordinates 
      vec3 s = normalize(vec3(Light.Position - position));
@@ -44,13 +44,7 @@ vec3 BlinnPhong(vec4 position, vec3 n, int light)
      float sDotN = max( dot(s,n), 0.0 );
 
      //difuse formula for light calculations
-     vec3 diffuse = Light.Ld * Kd * sDotN;
-
-     //specular component
-     vec3 Specular = Ks * Light.Ls * pow(max(dot(h,n), 1.0), Material.shininess); 
-
-     //retrieve texture color from texture
-     //vec3 texColor = texture(Tex1,TexCoord).rgb;          
+     vec3 diffuse = Light.Ld * Material.Kd * sDotN;
 
      //reflect vector
      vec3 r = reflect(-s,n);
@@ -58,8 +52,15 @@ vec3 BlinnPhong(vec4 position, vec3 n, int light)
      //viewing vector
      vec3 v = normalize(-position.xyz);
 
+
      //half vector
      vec3 h = normalize(v + s);
+
+     //specular component
+     vec3 Specular = Material.Ks * Light.Ls * pow(max(dot(h,n), 1.0), Material.shininess); 
+
+     //retrieve texture color from texture
+     //vec3 texColor = texture(Tex1,TexCoord).rgb;         
        
      //phong calculation
      vec3 LightIntensity = diffuse + Ambient + Specular;
@@ -69,7 +70,7 @@ vec3 BlinnPhong(vec4 position, vec3 n, int light)
 
 void main()
 {   
-    FragColor = vec4(BlinnPhong(position, normalize(normal)), 1.0);
+    FragColor = vec4(BlinnPhong(position, normalize(normal), 1), 1.0);
 
 }
 
