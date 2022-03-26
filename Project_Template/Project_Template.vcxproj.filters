@@ -63,6 +63,12 @@
     <ClCompile Include="helper\stb\stb_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="helper\objmesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helper\plane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="helper\scene.h">
@@ -111,6 +117,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helper\texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helper\aabb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helper\objmesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helper\plane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helper\utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

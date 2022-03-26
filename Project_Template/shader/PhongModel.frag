@@ -6,14 +6,15 @@ in vec4 position;
 in vec3 normal;
 
 in vec2 TexCoord;
+in vec3 LightDir;
+in vec3 ViewDir;
 
 //out variable, this typical for all fragment shaders
 layout (location = 0) out vec4 FragColor;
 
 
-layout (binding = 0) uniform sampler2D BrickTex;
-layout (binding = 1) uniform sampler2D MossTex;
-
+layout (binding = 0) uniform sampler2D ColorTex;
+layout (binding = 1) uniform sampler2D NormalMapTex;
 
 //light information structure
 uniform struct LightInfo 
@@ -23,6 +24,7 @@ uniform struct LightInfo
   vec3 La;
   vec3 Ls;
 } Light;
+
 
 //material information structure
 uniform struct MaterialInfo 
@@ -39,37 +41,37 @@ vec3 BlinnPhong(vec4 position, vec3 n, int light)
 
 
      //retrieve texture color from texture
-     vec3 BrickTexColor = texture(BrickTex, TexCoord).rgb;
-     vec4 MossTexColor = texture(MossTex, TexCoord);
+     vec3 TexColor = texture(ColorTex, TexCoord).rgb;
+     vec4 TexNormal = texture(NormalMapTex, TexCoord);
 
      //Mix Brick and Moss textures together, using alpha channel
-     vec3 col = mix(BrickTexColor.rgb, MossTexColor.rgb, MossTexColor.a);
+     //vec3 col = mix(BrickTexColor.rgb, MossTexColor.rgb, MossTexColor.a);
 
      //vec4 texColor = texture(BaseTex,TexCoord).rgb;
 
      //ambient component
-     vec3 Ambient = col * Light.La;   
+     vec3 Ambient = TexColor * Light.La;   
 
      //calculate light direction
-     vec3 s = normalize(vec3(Light.Position - position));
+     //vec3 s = normalize(vec3(Light.Position - position));
 
       //calculate dot product for vector s and n using max.
-     float sDotN = max( dot(s,n), 0.0 );
+     float sDotN = max( dot(LightDir,n), 0.0 );
 
      //difuse formula for light calculations
-     vec3 diffuse = Light.Ld * col * sDotN;
+     vec3 diffuse = Light.Ld * TexColor * sDotN;
 
      //reflect vector
-     vec3 r = reflect(-s,n);
+     vec3 r = reflect(-LightDir,n);
 
      //viewing vector
-     vec3 v = normalize(-position.xyz);
+     //vec3 v = normalize(-position.xyz);
 
      //half vector
-     vec3 h = normalize(v + s);
+     vec3 h = normalize(ViewDir + LightDir);
 
      //specular component
-     vec3 Specular = col * Light.Ls * pow(max(dot(h,n), 1.0), Material.shininess); 
+     vec3 Specular = TexColor * Light.Ls * pow(max(dot(h,n), 1.0), Material.shininess); 
        
      //phong calculation
      vec3 LightIntensity = diffuse + Ambient + Specular;
@@ -78,17 +80,11 @@ vec3 BlinnPhong(vec4 position, vec3 n, int light)
 
 void main()
 {   
-    //vec4 alphaMap = texture(AlphaTex, TexCoord);
 
-    //if(alphaMap.a < 0.15)
-    //    discard;
-    //else
-    //{
-     //   if(gl_FrontFacing)
-            FragColor = vec4(BlinnPhong(position, normalize(normal), 1), 1.0);
-    //    else
-    //        FragColor = vec4(BlinnPhong(position, normalize(-normal), 1), 1.0);
-   // }
+    vec3 normal = texture(NormalMapTex, TexCoord).xyz;
+    normal.xy = 2.0 * normal.xy - 1.0;
+
+    FragColor = vec4(BlinnPhong(position, normalize(normal), 1), 1.0);
 }
 
 

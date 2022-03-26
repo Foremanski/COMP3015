@@ -149,6 +149,8 @@
     <ClCompile Include="helper\cube.cpp" />
     <ClCompile Include="helper\glslprogram.cpp" />
     <ClCompile Include="helper\glutils.cpp" />
+    <ClCompile Include="helper\objmesh.cpp" />
+    <ClCompile Include="helper\plane.cpp" />
     <ClCompile Include="helper\sphere.cpp" />
     <ClCompile Include="helper\stb\stb_image.cpp" />
     <ClCompile Include="helper\teapot.cpp" />
@@ -159,10 +161,13 @@
     <ClCompile Include="scenebasic_uniform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="helper\aabb.h" />
     <ClInclude Include="helper\cube.h" />
     <ClInclude Include="helper\drawable.h" />
     <ClInclude Include="helper\glslprogram.h" />
     <ClInclude Include="helper\glutils.h" />
+    <ClInclude Include="helper\objmesh.h" />
+    <ClInclude Include="helper\plane.h" />
     <ClInclude Include="helper\random.h" />
     <ClInclude Include="helper\scene.h" />
     <ClInclude Include="helper\scenerunner.h" />
@@ -174,6 +179,7 @@
     <ClInclude Include="helper\texture.h" />
     <ClInclude Include="helper\torus.h" />
     <ClInclude Include="helper\trianglemesh.h" />
+    <ClInclude Include="helper\utils.h" />
     <ClInclude Include="scenebasic_uniform.h" />
   </ItemGroup>
   <ItemGroup>
