@@ -1,5 +1,5 @@
 #include "scenebasic_uniform.h"
-
+#include <sstream>
 #include <iostream>
 using std::cerr;
 using std::endl;
@@ -14,7 +14,7 @@ using glm::mat4;
 //teapot(13, glm::translate(mat4(1.0f), vec3(0.0f, 1.5f, 0.25f))) {}
 
 //constructor for Ogre
-SceneBasic_Uniform::SceneBasic_Uniform()
+SceneBasic_Uniform::SceneBasic_Uniform() : plane(50.0f, 50.0f, 1, 1)
 {
     ogre = ObjMesh::load("media/bs_ears.obj", false, true);
 }
@@ -25,7 +25,7 @@ void SceneBasic_Uniform::initScene()
 	glEnable(GL_DEPTH_TEST);
 
     //view = glm::lookAt(vec3(1.0f, 1.25f, 1.25f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
-    projection = mat4(1.0f);
+    //projection = mat4(1.0f);
 
     //initialise the model matrix
     model = mat4(1.0f);
@@ -41,36 +41,20 @@ void SceneBasic_Uniform::initScene()
     model = glm::rotate(model, glm::radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
     view = glm::lookAt(vec3(2.0f, 4.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
     */
+  
+    view = glm::lookAt(vec3(2.0f, 0.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 
-    //enable this group for ogre rendering, make sure you comment the ogre group
-    view = glm::lookAt(vec3(-1.0f, 0.25f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
-
-    //make sure you use the correct name, check your vertex shader
-    //material uniforms
-    prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
-    prog.setUniform("Material.Ks", 0.95f, 0.95f, 0.95f);
-    prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
-    prog.setUniform("Material.Shininess", 180.0f);   
-    
-    //light uniforms
-    prog.setUniform("Light.Ld", 0.5f, 0.5f, 0.5f);     
+     //light uniforms
+    prog.setUniform("Light.Ld", 0.5f, 0.5f, 0.5f);
     prog.setUniform("Light.La", 0.5f, 0.5f, 0.5f);
     prog.setUniform("Light.Ls", 0.5f, 0.5f, 0.5f);
-    prog.setUniform("Light.Position", view * glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)); 
+    prog.setUniform("Light.Position", view * glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 
 
-    //load textures and bind them
-    GLuint ogreDiffuse  = Texture::loadTexture("media/texture/ogre_diffuse.png");
-    GLuint ogreNormal =Texture::loadTexture("media/texture/ogre_normalmap.png");
-
-    //textures for mossy brick
-    //GLuint brick = Texture::loadTexture("../Project_Template/media/texture/brick1.jpg");
-    //GLuint moss = Texture::loadTexture("../Project_Template/media/texture/moss.png");
-
-   glActiveTexture(GL_TEXTURE0);
-   glBindTexture(GL_TEXTURE_2D, ogreDiffuse);
-   glActiveTexture(GL_TEXTURE1);
-   glBindTexture(GL_TEXTURE_2D, ogreNormal);
+    //fog uniforms
+    prog.setUniform("Fog.MaxDist", 30.0f);
+    prog.setUniform("Fog.MinDist", 1.0f);
+    prog.setUniform("Fog.Color", vec3(0.5f, 0.5f, 0.5f));
 }
 
 void SceneBasic_Uniform::compile()
@@ -94,11 +78,45 @@ void SceneBasic_Uniform::update( float t )
 void SceneBasic_Uniform::render()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //make sure you use the correct name, check your vertex shader
+    //material uniforms
+    prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
+    prog.setUniform("Material.Ks", 0.95f, 0.95f, 0.95f);
+    prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
+    prog.setUniform("Material.Shininess", 180.0f);
    
+    //load textures and bind them
+    GLuint ogreDiffuse = Texture::loadTexture("media/texture/ogre_diffuse.png");
+    GLuint ogreNormal = Texture::loadTexture("media/texture/ogre_normalmap.png");
+    
+
+    //textures for mossy brick
+    //GLuint brick = Texture::loadTexture("../Project_Template/media/texture/brick1.jpg");
+    //GLuint moss = Texture::loadTexture("../Project_Template/media/texture/moss.png");
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, ogreDiffuse);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, ogreNormal);
+    model = mat4(1.0f);
+    //model = glm::rotate(model, glm::radians(120.0f), vec3(0.0f, 5.0f, 0.0f));
+    model = glm::translate(model, vec3(0.0f, 0.0f, 0.0f));
     setMatrices();
-    //torus.render();     
-    //teapot.render();  
     ogre->render();
+
+    
+    GLuint brickTexture = Texture::loadTexture("media/texture/cement.jpg");
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, brickTexture);
+    
+    
+
+    model = mat4(1.0f);
+    model = glm::translate(model, vec3(0.0f, -1.45f, 0.0f));
+
+    setMatrices(); 
+    plane.render();
 }
 
 void SceneBasic_Uniform::setMatrices()

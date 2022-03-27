@@ -19,7 +19,7 @@ layout (binding = 1) uniform sampler2D NormalMapTex;
 //light information structure
 uniform struct LightInfo 
 {
-  vec4 Position; // Light position in eye coords.
+  vec4 LightPosition; // Light position in eye coords.
   vec3 Ld;       // Diffuse light intensity
   vec3 La;
   vec3 Ls;
@@ -34,6 +34,13 @@ uniform struct MaterialInfo
   vec3 Ka;
   float shininess;
 } Material;
+
+uniform struct FogInfo
+{
+    float MaxDist;
+    float MinDist;
+    vec3 FogColor;
+} Fog;
 
 
 vec3 BlinnPhong(vec4 position, vec3 n, int light)
@@ -80,11 +87,25 @@ vec3 BlinnPhong(vec4 position, vec3 n, int light)
 
 void main()
 {   
+    //calculate fog
+    float dist = abs(position.z);
+    float fogFactor = (Fog.MaxDist - dist) / (Fog.MaxDist - Fog.MinDist);
 
+    fogFactor = clamp(fogFactor, 0.0, 1.0);
+
+    //get BlinnPhong calculation
+    vec3 shadeColor = BlinnPhong(position, normalize(normal),1);
+
+    //combine color of Fog, BlinnPhong and fog density
+    vec3 color = mix(Fog.FogColor, shadeColor, fogFactor);
+
+    //mapping normal onto texture
     vec3 normal = texture(NormalMapTex, TexCoord).xyz;
     normal.xy = 2.0 * normal.xy - 1.0;
 
-    FragColor = vec4(BlinnPhong(position, normalize(normal), 1), 1.0);
+    //output
+    FragColor = vec4(color, 1.0);
+    //FragColor = vec4(BlinnPhong(position, normalize(normal), 1), 1.0);
 }
 
 

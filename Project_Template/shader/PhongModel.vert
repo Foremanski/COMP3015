@@ -21,7 +21,7 @@ uniform mat4 MVP;				//model view projection matrix
 
 uniform struct LightInfo 
 {
-  vec4 Position; // Light position in eye coords.
+  vec4 LightPosition; // Light position in eye coords.
   vec3 Ld;       // Diffuse light intensity
   vec3 La;
   vec3 Ls;
@@ -46,7 +46,7 @@ void main()
 
     //transform light direction and view direction to tangent space
     vec3 pos = vec3( ModelViewMatrix * vec4(VertexPosition, 1.0));
-    LightDir = toObjectLocal * (Light.Position.xyz - pos);
+    LightDir = toObjectLocal * (Light.LightPosition.xyz - pos);
     ViewDir = toObjectLocal * normalize(-pos);
 
     //pass VertexTexCoord to TexCoord
