@@ -14,9 +14,11 @@ using glm::mat4;
 //teapot(13, glm::translate(mat4(1.0f), vec3(0.0f, 1.5f, 0.25f))) {}
 
 //constructor for Ogre
-SceneBasic_Uniform::SceneBasic_Uniform() : plane(50.0f, 50.0f, 1, 1)
+SceneBasic_Uniform::SceneBasic_Uniform() : plane(50.0f, 50.0f, 1, 1), plane2(50.0f, 50.0f, 1, 1), plane3(50.0f, 50.0f, 1, 1)
 {
     ogre = ObjMesh::load("media/bs_ears.obj", false, true);
+
+
 }
 
 void SceneBasic_Uniform::initScene()
@@ -48,11 +50,11 @@ void SceneBasic_Uniform::initScene()
     prog.setUniform("Light.Ld", 0.5f, 0.5f, 0.5f);
     prog.setUniform("Light.La", 0.5f, 0.5f, 0.5f);
     prog.setUniform("Light.Ls", 0.5f, 0.5f, 0.5f);
-    prog.setUniform("Light.Position", view * glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+    prog.setUniform("Light.LightPosition", glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
 
 
     //fog uniforms
-    prog.setUniform("Fog.MaxDist", 30.0f);
+    prog.setUniform("Fog.MaxDist", 10.0f);
     prog.setUniform("Fog.MinDist", 1.0f);
     prog.setUniform("Fog.Color", vec3(0.5f, 0.5f, 0.5f));
 }
@@ -86,37 +88,62 @@ void SceneBasic_Uniform::render()
     prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
     prog.setUniform("Material.Shininess", 180.0f);
    
-    //load textures and bind them
+    //ogre textures
     GLuint ogreDiffuse = Texture::loadTexture("media/texture/ogre_diffuse.png");
     GLuint ogreNormal = Texture::loadTexture("media/texture/ogre_normalmap.png");
-    
-
-    //textures for mossy brick
-    //GLuint brick = Texture::loadTexture("../Project_Template/media/texture/brick1.jpg");
-    //GLuint moss = Texture::loadTexture("../Project_Template/media/texture/moss.png");
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, ogreDiffuse);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, ogreNormal);
+
+    //render ogre model
     model = mat4(1.0f);
-    //model = glm::rotate(model, glm::radians(120.0f), vec3(0.0f, 5.0f, 0.0f));
     model = glm::translate(model, vec3(0.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(45.0f), vec3(0.0f, 1.0f, 0.0f));
     setMatrices();
     ogre->render();
 
+    //concrete floor texture
+    GLuint concreteTexture = Texture::loadTexture("media/texture/cement.jpg");
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, concreteTexture);
+
+    //make sure you use the correct name, check your vertex shader
+    //material uniforms
+    prog.setUniform("Material.Kd", 0.6f, 0.6f, 0.6f);
+    prog.setUniform("Material.Ks", 0.05f, 0.05f, 0.05f);
+    prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
+    prog.setUniform("Material.Shininess", 1.0f);
     
-    GLuint brickTexture = Texture::loadTexture("media/texture/cement.jpg");
+    //render concrete floor
+    model = mat4(1.0f);
+    model = glm::translate(model, vec3(0.0f, -1.45f, 0.0f));
+    setMatrices(); 
+    plane.render();
+
+    //brick wall texture
+    GLuint brickTexture = Texture::loadTexture("media/texture/brick1.jpg");
+    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, brickTexture);
     
-    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    model = mat4(1.0f);
-    model = glm::translate(model, vec3(0.0f, -1.45f, 0.0f));
+    //render brick walls
+    model = glm::translate(model, vec3(0.0f, 10.0f, -10.0f));
+    model = glm::rotate(model, glm::radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
 
-    setMatrices(); 
-    plane.render();
+    setMatrices();
+    plane2.render();
+
+
+
+    setMatrices();
+    plane3.render();
+
 }
 
 void SceneBasic_Uniform::setMatrices()

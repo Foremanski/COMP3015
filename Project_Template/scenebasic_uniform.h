@@ -21,7 +21,7 @@ private:
     GLSLProgram prog;
     
     std::unique_ptr<ObjMesh> ogre;
-    Plane plane;
+    Plane plane, plane2, plane3;
 
     void setMatrices();
 

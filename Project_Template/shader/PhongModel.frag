@@ -66,7 +66,7 @@ vec3 BlinnPhong(vec4 position, vec3 n, int light)
      float sDotN = max( dot(LightDir,n), 0.0 );
 
      //difuse formula for light calculations
-     vec3 diffuse = Light.Ld * TexColor * sDotN;
+     vec3 Diffuse = Light.Ld * TexColor * sDotN;
 
      //reflect vector
      vec3 r = reflect(-LightDir,n);
@@ -81,14 +81,14 @@ vec3 BlinnPhong(vec4 position, vec3 n, int light)
      vec3 Specular = TexColor * Light.Ls * pow(max(dot(h,n), 1.0), Material.shininess); 
        
      //phong calculation
-     vec3 LightIntensity = diffuse + Ambient + Specular;
+     vec3 LightIntensity = Diffuse + Ambient + Specular;
      return LightIntensity;
 }
 
 void main()
 {   
     //calculate fog
-    float dist = abs(position.z);
+    float dist = abs(position.x + 1.5);
     float fogFactor = (Fog.MaxDist - dist) / (Fog.MaxDist - Fog.MinDist);
 
     fogFactor = clamp(fogFactor, 0.0, 1.0);
