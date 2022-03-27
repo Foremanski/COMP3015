@@ -6,6 +6,8 @@ using std::endl;
 
 #include <glm/gtc/matrix_transform.hpp>
 using glm::vec3;
+using glm::vec4;
+using glm::mat3;
 using glm::mat4;
 
 //constructor for torus
@@ -14,7 +16,7 @@ using glm::mat4;
 //teapot(13, glm::translate(mat4(1.0f), vec3(0.0f, 1.5f, 0.25f))) {}
 
 //constructor for Ogre
-SceneBasic_Uniform::SceneBasic_Uniform() : plane(50.0f, 50.0f, 1, 1), plane2(50.0f, 50.0f, 1, 1), plane3(50.0f, 50.0f, 1, 1)
+SceneBasic_Uniform::SceneBasic_Uniform() : plane(10.0f, 20.0f, 1, 1), plane2(20.0f, 20.0f, 1, 1), plane3(20.0f, 20.0f, 1, 1)
 {
     ogre = ObjMesh::load("media/bs_ears.obj", false, true);
 
@@ -25,38 +27,32 @@ void SceneBasic_Uniform::initScene()
 {
     compile();
 	glEnable(GL_DEPTH_TEST);
-
-    //view = glm::lookAt(vec3(1.0f, 1.25f, 1.25f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
-    //projection = mat4(1.0f);
-
-    //initialise the model matrix
-    model = mat4(1.0f);
-    
-    /*
-    //enable this group for torus rendering, make sure you comment the teapot group
-    model = glm::rotate(model, glm::radians(-35.0f), vec3(1.0f, 0.0f, 0.0f)); //rotate model on x axis
-    model = glm::rotate(model, glm::radians(15.0f), vec3(0.0f, 1.0f, 0.0f));  //rotate model on y axis
-    view = glm::lookAt(vec3(0.0f, 0.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f)); //sets the view - read in the documentation about glm::lookAt. if still have questions,come an dtalk to me
-
-    //enable this group for teapot rendering, make sure you comment the torus group
-    model = glm::translate(model, vec3(0.0, -1.0, 0.0));
-    model = glm::rotate(model, glm::radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
-    view = glm::lookAt(vec3(2.0f, 4.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
-    */
   
+    //set camera angle and projection
     view = glm::lookAt(vec3(2.0f, 0.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+    projection = mat4(1.0f);
+    //set light position coords
+    vec4 lightPos = vec4(0.0f, 10.0f, 0.0f, 5.0f);
+
 
      //light uniforms
-    prog.setUniform("Light.Ld", 0.5f, 0.5f, 0.5f);
-    prog.setUniform("Light.La", 0.5f, 0.5f, 0.5f);
-    prog.setUniform("Light.Ls", 0.5f, 0.5f, 0.5f);
-    prog.setUniform("Light.LightPosition", glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+    prog.setUniform("Light.Ld", 0.1f, 0.1f, 0.1f);
+    prog.setUniform("Light.La", 0.4f, 0.4f, 0.4f);
+    prog.setUniform("Light.Ls", 0.4f, 0.4f, 0.4f);
+    prog.setUniform("Light.LightPosition", lightPos);
 
+    //spotlight uniforms
+    prog.setUniform("Spot.L", vec3(0.9f));
+    prog.setUniform("Spot.La", vec3(1.0f));
+    prog.setUniform("Spot.Exponent", 1.0f);
+    prog.setUniform("Spot.Cutoff", glm::radians(1.0f));  
+    prog.setUniform("Spot.SpotPosition", vec4(1.0f, 7.0f, 1.0f, 0.0f));
+    prog.setUniform("Spot.Direction", vec4(0.0f, 0.0f, 0.0f, 0.0f));
 
     //fog uniforms
-    prog.setUniform("Fog.MaxDist", 10.0f);
+    prog.setUniform("Fog.MaxDist", 5.0f);
     prog.setUniform("Fog.MinDist", 1.0f);
-    prog.setUniform("Fog.Color", vec3(0.5f, 0.5f, 0.5f));
+    prog.setUniform("Fog.Color", vec3(171.0f, 171.0f, 171.0f));
 }
 
 void SceneBasic_Uniform::compile()
@@ -108,8 +104,7 @@ void SceneBasic_Uniform::render()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, concreteTexture);
 
-    //make sure you use the correct name, check your vertex shader
-    //material uniforms
+    //concrete & brick material uniforms
     prog.setUniform("Material.Kd", 0.6f, 0.6f, 0.6f);
     prog.setUniform("Material.Ks", 0.05f, 0.05f, 0.05f);
     prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
@@ -126,20 +121,16 @@ void SceneBasic_Uniform::render()
     
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, brickTexture);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     //render brick walls
-    model = glm::translate(model, vec3(0.0f, 10.0f, -10.0f));
+    model = glm::translate(model, vec3(0.0f, 10.0f, -5.0f));
     model = glm::rotate(model, glm::radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
 
     setMatrices();
     plane2.render();
 
-
+    model = glm::translate(model, vec3(-5.0f, 10.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(90.0f), vec3(0.0f, 0.0f, 1.0f));
 
     setMatrices();
     plane3.render();

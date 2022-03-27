@@ -19,13 +19,11 @@ layout (binding = 1) uniform sampler2D NormalMapTex;
 //light information structure
 uniform struct LightInfo 
 {
-  vec4 LightPosition; // Light position in eye coords.
-  vec3 Ld;       // Diffuse light intensity
+  vec4 LightPosition; 
+  vec3 Ld;      
   vec3 La;
   vec3 Ls;
 } Light;
-
-
 //material information structure
 uniform struct MaterialInfo 
 {
@@ -34,35 +32,38 @@ uniform struct MaterialInfo
   vec3 Ka;
   float shininess;
 } Material;
-
+//fog structure
 uniform struct FogInfo
 {
     float MaxDist;
     float MinDist;
     vec3 FogColor;
 } Fog;
-
+//spotlight structure
+uniform struct SpotLightInfo {
+    vec3 SpotPosition;
+    vec3 L;
+    vec3 La;
+    vec3 Direction;
+    float Exponent;
+    float Cutoff;
+} Spot;
 
 vec3 BlinnPhong(vec4 position, vec3 n, int light)
 {
-
-
      //retrieve texture color from texture
      vec3 TexColor = texture(ColorTex, TexCoord).rgb;
      vec4 TexNormal = texture(NormalMapTex, TexCoord);
 
-     //Mix Brick and Moss textures together, using alpha channel
-     //vec3 col = mix(BrickTexColor.rgb, MossTexColor.rgb, MossTexColor.a);
-
-     //vec4 texColor = texture(BaseTex,TexCoord).rgb;
-
      //ambient component
      vec3 Ambient = TexColor * Light.La;   
 
-     //calculate light direction
-     //vec3 s = normalize(vec3(Light.Position - position));
+     //spotlight variables
+     float cosAng = dot(-LightDir, normalize(Spot.Direction));
+     float angle = acos (cosAng);
+     float spotScale = 0.0;
 
-      //calculate dot product for vector s and n using max.
+     //calculate dot product for vector s and n using max
      float sDotN = max( dot(LightDir,n), 0.0 );
 
      //difuse formula for light calculations
@@ -71,24 +72,27 @@ vec3 BlinnPhong(vec4 position, vec3 n, int light)
      //reflect vector
      vec3 r = reflect(-LightDir,n);
 
-     //viewing vector
-     //vec3 v = normalize(-position.xyz);
-
      //half vector
      vec3 h = normalize(ViewDir + LightDir);
-
+              
      //specular component
      vec3 Specular = TexColor * Light.Ls * pow(max(dot(h,n), 1.0), Material.shininess); 
-       
+     
+     //calculate spotlight if angle of light is less than cutoff
+     if(angle < Spot.Cutoff)
+     {
+         spotScale = pow(cosAng, Spot.Exponent);
+     }            
+          
      //phong calculation
-     vec3 LightIntensity = Diffuse + Ambient + Specular;
+     vec3 LightIntensity = Ambient + spotScale + Spot.L * (Diffuse + Specular);
      return LightIntensity;
 }
 
 void main()
 {   
     //calculate fog
-    float dist = abs(position.x + 1.5);
+    float dist = abs(position.z);
     float fogFactor = (Fog.MaxDist - dist) / (Fog.MaxDist - Fog.MinDist);
 
     fogFactor = clamp(fogFactor, 0.0, 1.0);
