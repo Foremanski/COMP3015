@@ -32,13 +32,13 @@ void SceneBasic_Uniform::initScene()
     view = glm::lookAt(vec3(2.0f, 0.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
     projection = mat4(1.0f);
     //set light position coords
-    vec4 lightPos = vec4(0.0f, 10.0f, 0.0f, 5.0f);
+    vec4 lightPos = vec4(10.0f, 5.0f, -5.0f, 0.0f);
 
 
      //light uniforms
     prog.setUniform("Light.Ld", 0.1f, 0.1f, 0.1f);
     prog.setUniform("Light.La", 0.4f, 0.4f, 0.4f);
-    prog.setUniform("Light.Ls", 0.4f, 0.4f, 0.4f);
+    prog.setUniform("Light.Ls", 0.3f, 0.3f, 0.3f);
     prog.setUniform("Light.LightPosition", lightPos);
 
     //spotlight uniforms
@@ -70,7 +70,7 @@ void SceneBasic_Uniform::compile()
 
 void SceneBasic_Uniform::update( float t )
 {
-	//update your angle here
+	
 }
 
 void SceneBasic_Uniform::render()
@@ -103,6 +103,8 @@ void SceneBasic_Uniform::render()
     GLuint concreteTexture = Texture::loadTexture("media/texture/cement.jpg");
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, concreteTexture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, GL_CLEAR);
 
     //concrete & brick material uniforms
     prog.setUniform("Material.Kd", 0.6f, 0.6f, 0.6f);
@@ -122,12 +124,16 @@ void SceneBasic_Uniform::render()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, brickTexture);
 
+
     //render brick walls
     model = glm::translate(model, vec3(0.0f, 10.0f, -5.0f));
     model = glm::rotate(model, glm::radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
 
     setMatrices();
     plane2.render();
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, brickTexture);
 
     model = glm::translate(model, vec3(-5.0f, 10.0f, 0.0f));
     model = glm::rotate(model, glm::radians(90.0f), vec3(0.0f, 0.0f, 1.0f));

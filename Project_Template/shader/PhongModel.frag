@@ -97,15 +97,17 @@ void main()
 
     fogFactor = clamp(fogFactor, 0.0, 1.0);
 
+    //mapping normal onto texture
+    vec3 normal = texture(NormalMapTex, TexCoord).xyz;
+    normal.xy = 2.0 * normal.xy - 1.0;
+
     //get BlinnPhong calculation
     vec3 shadeColor = BlinnPhong(position, normalize(normal),1);
 
     //combine color of Fog, BlinnPhong and fog density
     vec3 color = mix(Fog.FogColor, shadeColor, fogFactor);
 
-    //mapping normal onto texture
-    vec3 normal = texture(NormalMapTex, TexCoord).xyz;
-    normal.xy = 2.0 * normal.xy - 1.0;
+    
 
     //output
     FragColor = vec4(color, 1.0);
