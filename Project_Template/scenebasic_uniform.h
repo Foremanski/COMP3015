@@ -19,9 +19,17 @@ class SceneBasic_Uniform : public Scene
 {
 private:
     GLSLProgram prog;
-    
-    std::unique_ptr<ObjMesh> ogre;
-    Plane plane, plane2, plane3;
+    GLuint fsQuad, fboHandle, renderTex;
+
+
+    Torus torus;
+    Plane plane;
+    Teapot teapot;
+
+    void setupFBO();
+
+    void pass1();
+    void pass2();
 
     void setMatrices();
 
