@@ -10,13 +10,15 @@ using glm::vec4;
 using glm::mat3;
 using glm::mat4;
 
+
+
 //constructor for torus
 //torus(0.7f, 0.3f, 50, 50) {}
 //constructor for teapot
 //teapot(13, glm::translate(mat4(1.0f), vec3(0.0f, 1.5f, 0.25f))) {}
 
 //constructor for Ogre
-SceneBasic_Uniform::SceneBasic_Uniform() : plane(10.0f, 20.0f, 1, 1), plane2(20.0f, 20.0f, 1, 1), plane3(20.0f, 20.0f, 1, 1)
+SceneBasic_Uniform::SceneBasic_Uniform() : torus(1.0f, 0.5f, 50, 50), plane(10.0f, 20.0f, 1, 1) /* sun(1,30,30) ,planet1(0.5, 30, 30), planet2(0.5, 30, 30) */
 {
     ogre = ObjMesh::load("media/bs_ears.obj", false, true);
 
@@ -29,7 +31,8 @@ void SceneBasic_Uniform::initScene()
 	glEnable(GL_DEPTH_TEST);
   
     //set camera angle and projection
-    view = glm::lookAt(vec3(2.0f, 0.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+    view = glm::lookAt(vec3(5.0f, 5.0f, 5.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+
     projection = mat4(1.0f);
     //set light position coords
     vec4 lightPos = vec4(10.0f, 5.0f, -5.0f, 0.0f);
@@ -53,6 +56,12 @@ void SceneBasic_Uniform::initScene()
     prog.setUniform("Fog.MaxDist", 5.0f);
     prog.setUniform("Fog.MinDist", 1.0f);
     prog.setUniform("Fog.Color", vec3(171.0f, 171.0f, 171.0f));
+
+    //brick wall texture
+    brickTexture = Texture::loadTexture("media/texture/brick1.jpg");
+    concreteTexture = Texture::loadTexture("media/texture/hardwood2_diffuse.jpg");
+    ogreDiffuse = Texture::loadTexture("media/texture/ogre_diffuse.png");
+    ogreNormal = Texture::loadTexture("media/texture/ogre_normalmap.png");
 }
 
 void SceneBasic_Uniform::compile()
@@ -77,6 +86,8 @@ void SceneBasic_Uniform::render()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+    
     //make sure you use the correct name, check your vertex shader
     //material uniforms
     prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
@@ -84,9 +95,7 @@ void SceneBasic_Uniform::render()
     prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
     prog.setUniform("Material.Shininess", 180.0f);
    
-    //ogre textures
-    GLuint ogreDiffuse = Texture::loadTexture("media/texture/ogre_diffuse.png");
-    GLuint ogreNormal = Texture::loadTexture("media/texture/ogre_normalmap.png");
+    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, ogreDiffuse);
     glActiveTexture(GL_TEXTURE1);
@@ -98,15 +107,14 @@ void SceneBasic_Uniform::render()
     model = glm::rotate(model, glm::radians(45.0f), vec3(0.0f, 1.0f, 0.0f));
     setMatrices();
     ogre->render();
-
-    //concrete floor texture
-    GLuint concreteTexture = Texture::loadTexture("media/texture/cement.jpg");
+    
+    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, concreteTexture);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, GL_CLEAR);
 
-    //concrete & brick material uniforms
+    //concretes
     prog.setUniform("Material.Kd", 0.6f, 0.6f, 0.6f);
     prog.setUniform("Material.Ks", 0.05f, 0.05f, 0.05f);
     prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
@@ -118,28 +126,42 @@ void SceneBasic_Uniform::render()
     setMatrices(); 
     plane.render();
 
-    //brick wall texture
-    GLuint brickTexture = Texture::loadTexture("media/texture/brick1.jpg");
+    setMatrices();
+    torus.render();
+
     
+    /*
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, brickTexture);
 
+    //brick material uniforms
+    prog.setUniform("Material.Kd", 0.6f, 0.6f, 0.6f);
+    prog.setUniform("Material.Ks", 0.05f, 0.05f, 0.05f);
+    prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
+    prog.setUniform("Material.Shininess", 1.0f);
 
-    //render brick walls
-    model = glm::translate(model, vec3(0.0f, 10.0f, -5.0f));
-    model = glm::rotate(model, glm::radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
-
-    setMatrices();
-    plane2.render();
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, brickTexture);
-
-    model = glm::translate(model, vec3(-5.0f, 10.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(90.0f), vec3(0.0f, 0.0f, 1.0f));
+    //render concrete floor
+    model = mat4(1.0f);
+    model = glm::translate(model, vec3(2.0f, 0.0f, 2.0f));
 
     setMatrices();
-    plane3.render();
+    sun.render();
+
+    //render concrete floor
+    model = mat4(1.0f);
+    model = glm::translate(model, vec3(0.0f, 0.0f, 2.0f));
+
+    setMatrices();
+    planet1.render();
+
+    //render concrete floor
+    model = mat4(1.0f);
+    model = glm::translate(model, vec3(2.0f, 0.0f, 0.0f));
+
+    setMatrices();
+    planet2.render();
+
+    */
 
 }
 
