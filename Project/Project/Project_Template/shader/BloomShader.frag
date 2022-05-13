@@ -16,6 +16,7 @@ layout (location = 0) out vec4 FragColor;
 
 uniform float EdgeThreshold;
 uniform int Pass;
+uniform float Weight[5];
 
 const vec3 lum = vec3(0.2126, 0.7152, 0.0722);
 
@@ -69,38 +70,40 @@ vec4 pass1()
 
 vec4 pass2()
 {
-    ivec2 pix = ivec2(gl_FragCoord.xy); //we grab a pixel to check if edge
-    //pick neighboutring pixels for convolution filter
-    //check lecture slides
-    float s00 = luminance(texelFetchOffset(RenderTex, pix, 0, ivec2(-1,1)).rgb);
-    float s10 = luminance(texelFetchOffset(RenderTex, pix, 0, ivec2(-1,0)).rgb);
-    float s20 = luminance(texelFetchOffset(RenderTex, pix, 0, ivec2(-1,-1)).rgb);
-    float s01 = luminance(texelFetchOffset(RenderTex, pix, 0, ivec2(0,1)).rgb);
-    float s21 = luminance(texelFetchOffset(RenderTex, pix, 0, ivec2(0,-1)).rgb);
-    float s02 = luminance(texelFetchOffset(RenderTex, pix, 0, ivec2(1,1)).rgb);
-    float s12 = luminance(texelFetchOffset(RenderTex, pix, 0, ivec2(1,0)).rgb);
-    float s22 = luminance(texelFetchOffset(RenderTex, pix, 0, ivec2(1,-1)).rgb);
+    ivec2 pix = ivec2( gl_FragCoord.xy );
+    vec4 sum = texelFetch(RenderTex, pix, 0) * Weight[0];
 
-    float sx = s00 + 2 * s10 + s20 - (s02 + 2 * s12 + s22);
-    float sy = s00 + 2 * s01 + s02 - (s20 + 2 * s21 + s22);
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,1) ) * Weight[1];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,-1) ) * Weight[1];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,2) ) * Weight[2];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,-2) ) * Weight[2];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,3) ) * Weight[3];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,-3) ) * Weight[3];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,4) ) * Weight[4];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,-4) ) * Weight[4];
 
-    float g = sx * sx + sy * sy;
-
-    if( g > EdgeThreshold )
-    {
-        return vec4(1.0); //edge
-    }
-    
-    else
-    {
-        return vec4(0.0,0.0,0.0,1.0); //no edge
-    }  
+    return sum;
 }
+vec4 pass3()
+{
+    ivec2 pix = ivec2( gl_FragCoord.xy );
+    vec4 sum = texelFetch(RenderTex, pix, 0) * Weight[0];
 
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(1,0) ) * Weight[1];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(-1,0) ) * Weight[1];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(2,0) ) * Weight[2];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(-2,0) ) * Weight[2];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(3,0) ) * Weight[3];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(-3,0) ) * Weight[3];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(4,0) ) * Weight[4];
+    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(-4,0) ) * Weight[4];
+
+    return sum;
+}
 
 void main()
 {   
     if( Pass == 1 ) FragColor = pass1();
-    if( Pass == 2 ) FragColor = pass2(); 
-
+    else if( Pass == 2 ) FragColor = pass2(); 
+    else if ( Pass == 3) FragColor = pass3();
 }

@@ -185,6 +185,8 @@
   <ItemGroup>
     <None Include="shader\BloomShader.frag" />
     <None Include="shader\BloomShader.vert" />
+    <None Include="shader\BlurShader.frag" />
+    <None Include="shader\BlurShader.vert" />
     <None Include="shader\PhongModel.frag" />
     <None Include="shader\PhongModel.vert" />
   </ItemGroup>
