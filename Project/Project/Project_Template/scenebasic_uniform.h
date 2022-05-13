@@ -21,9 +21,9 @@ private:
 
     //GLuint brickTexture, concreteTexture;
 
-    GLuint fsQuad;
-    GLuint renderFBO, intermediateFBO;
-    GLuint renderTex, intermediateTex;
+    GLuint hdrFBO;
+    GLuint quad;
+    GLuint hdrTex, avgTex;
 
     Plane plane;
     Sphere sun;
@@ -36,8 +36,14 @@ private:
     void setupFBO();
     void pass1();
     void pass2();
+
+    void computeLogAveLuminance();
+    void drawScene();
+
+    /*
     void pass3();
     float gauss(float, float);
+    */
 
 public:
     SceneBasic_Uniform();
