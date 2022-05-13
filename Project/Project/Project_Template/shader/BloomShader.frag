@@ -3,22 +3,11 @@
 //in variable that receives the diffuse calculation from the vertex shader
 in vec4 Position;
 in vec3 Normal;
-
 in vec2 TexCoord;
-in vec3 LightDir;
-in vec3 ViewDir;
-
-
-layout (binding = 0) uniform sampler2D RenderTex;
 
 //out variable, this typical for all fragment shaders
 layout (location = 0) out vec4 FragColor;
-
-uniform float EdgeThreshold;
-uniform int Pass;
-uniform float Weight[5];
-
-const vec3 lum = vec3(0.2126, 0.7152, 0.0722);
+layout (location = 1) out vec3 HdrColor;
 
 //light information structure
 uniform struct LightInfo 
@@ -36,7 +25,28 @@ uniform struct MaterialInfo
   vec3 Ka;
   float shininess;
 } Material;
-//fog structure
+
+
+uniform int Pass;
+uniform float AveLum;
+
+layout (binding = 0) uniform sampler2D HdrTex;
+
+//RGB/XYZ conversion
+uniform mat3 rgb2xyz = mat3(
+ 0.4124564, 0.2126729, 0.0193339,
+ 0.3575761, 0.7151522, 0.1191920,
+ 0.1804375, 0.0721750, 0.9503041 );
+
+uniform mat3 xyz2rgb = mat3(
+ 3.2404542, -0.9692660, 0.0556434,
+ -1.5371385, 1.8760108, -0.2040259,
+ -0.4985314, 0.0415560, 1.0572252 );
+
+uniform float Exposure = 0.35;
+uniform float White = 0.928;
+uniform bool DoToneMap = true;
+
 
 
 vec3 BlinnPhong(vec4 position, vec3 n)
@@ -58,52 +68,47 @@ vec3 BlinnPhong(vec4 position, vec3 n)
     return Ambient + Light.L * (Diffuse + Specular);
 }
 
-float luminance(vec3 color)
+void pass1()
 {
-    return dot(lum, color);
+    vec3 n = normalize(Normal);
+
+    HdrColor = vec3(0.0);
+    for(int i = 0; i < 3; i++)
+    {
+        HdrColor += BlinnPhong(Position, n), i;
+    }
 }
 
-vec4 pass1()
+void pass2()
 {
-    return vec4(BlinnPhong(Position,normalize(Normal)), 1.0f);
-}
+    // Retrieve high-res color from texture
+    vec4 color = texture( HdrTex, TexCoord );
 
-vec4 pass2()
-{
-    ivec2 pix = ivec2( gl_FragCoord.xy );
-    vec4 sum = texelFetch(RenderTex, pix, 0) * Weight[0];
+    // Convert to XYZ
+    vec3 xyzCol = rgb2xyz * vec3(color);
 
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,1) ) * Weight[1];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,-1) ) * Weight[1];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,2) ) * Weight[2];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,-2) ) * Weight[2];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,3) ) * Weight[3];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,-3) ) * Weight[3];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,4) ) * Weight[4];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(0,-4) ) * Weight[4];
+    // Convert to xyY
+    float xyzSum = xyzCol.x + xyzCol.y + xyzCol.z;
+    vec3 xyYCol = vec3( xyzCol.x / xyzSum, xyzCol.y / xyzSum, xyzCol.y);
 
-    return sum;
-}
-vec4 pass3()
-{
-    ivec2 pix = ivec2( gl_FragCoord.xy );
-    vec4 sum = texelFetch(RenderTex, pix, 0) * Weight[0];
+    // Apply the tone mapping operation to the luminance (xyYCol.z or xyzCol.y)
+    float L = (Exposure * xyYCol.z) / AveLum;
+    L = (L * ( 1 + L / (White * White) )) / ( 1 + L );
 
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(1,0) ) * Weight[1];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(-1,0) ) * Weight[1];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(2,0) ) * Weight[2];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(-2,0) ) * Weight[2];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(3,0) ) * Weight[3];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(-3,0) ) * Weight[3];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(4,0) ) * Weight[4];
-    sum += texelFetchOffset( RenderTex, pix, 0, ivec2(-4,0) ) * Weight[4];
+    // Using the new luminance, convert back to XYZ
+    xyzCol.x = (L * xyYCol.x) / (xyYCol.y);
+    xyzCol.y = L;
+    xyzCol.z = (L * (1 - xyYCol.x - xyYCol.y))/xyYCol.y;
 
-    return sum;
+     // Convert back to RGB and send to output buffer
+    if( DoToneMap )
+    FragColor = vec4( xyz2rgb * xyzCol, 1.0);
+    else
+    FragColor = color;
 }
 
 void main()
 {   
-    if( Pass == 1 ) FragColor = pass1();
-    else if( Pass == 2 ) FragColor = pass2(); 
-    else if ( Pass == 3) FragColor = pass3();
+    if( Pass == 1 ) pass1();
+    else if( Pass == 2 ) pass2(); 
 }
