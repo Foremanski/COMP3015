@@ -135,5 +135,7 @@
   <ItemGroup>
     <None Include="shader\PhongModel.frag" />
     <None Include="shader\PhongModel.vert" />
+    <None Include="shader\BloomShader.frag" />
+    <None Include="shader\BloomShader.vert" />
   </ItemGroup>
 </Project>

@@ -18,50 +18,26 @@ using glm::mat4;
 //teapot(13, glm::translate(mat4(1.0f), vec3(0.0f, 1.5f, 0.25f))) {}
 
 //constructor for Ogre
-SceneBasic_Uniform::SceneBasic_Uniform() : torus(1.0f, 0.5f, 50, 50), plane(10.0f, 20.0f, 1, 1) /* sun(1,30,30) ,planet1(0.5, 30, 30), planet2(0.5, 30, 30) */
+SceneBasic_Uniform::SceneBasic_Uniform() : sun(0.7f,30,30), plane(40.0f, 40.0f, 1, 1) /* sun(1,30,30) ,planet1(0.5, 30, 30), planet2(0.5, 30, 30) */
 {
-    ogre = ObjMesh::load("media/bs_ears.obj", false, true);
-
-
+    
 }
 
 void SceneBasic_Uniform::initScene()
 {
     compile();
+
+    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+
 	glEnable(GL_DEPTH_TEST);
+
+    setupFBO();
   
-    //set camera angle and projection
-    view = glm::lookAt(vec3(5.0f, 5.0f, 5.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
-
-    projection = mat4(1.0f);
-    //set light position coords
-    vec4 lightPos = vec4(10.0f, 5.0f, -5.0f, 0.0f);
-
-
-     //light uniforms
-    prog.setUniform("Light.Ld", 0.1f, 0.1f, 0.1f);
-    prog.setUniform("Light.La", 0.4f, 0.4f, 0.4f);
-    prog.setUniform("Light.Ls", 0.3f, 0.3f, 0.3f);
-    prog.setUniform("Light.LightPosition", lightPos);
-
-    //spotlight uniforms
-    prog.setUniform("Spot.L", vec3(0.9f));
-    prog.setUniform("Spot.La", vec3(1.0f));
-    prog.setUniform("Spot.Exponent", 1.0f);
-    prog.setUniform("Spot.Cutoff", glm::radians(1.0f));  
-    prog.setUniform("Spot.SpotPosition", vec4(1.0f, 7.0f, 1.0f, 0.0f));
-    prog.setUniform("Spot.Direction", vec4(0.0f, 0.0f, 0.0f, 0.0f));
-
-    //fog uniforms
-    prog.setUniform("Fog.MaxDist", 5.0f);
-    prog.setUniform("Fog.MinDist", 1.0f);
-    prog.setUniform("Fog.Color", vec3(171.0f, 171.0f, 171.0f));
-
+    
+    
+    concreteTexture = Texture::loadTexture("media/texture/hardwood2_diffuse.jpg");
     //brick wall texture
     brickTexture = Texture::loadTexture("media/texture/brick1.jpg");
-    concreteTexture = Texture::loadTexture("media/texture/hardwood2_diffuse.jpg");
-    ogreDiffuse = Texture::loadTexture("media/texture/ogre_diffuse.png");
-    ogreNormal = Texture::loadTexture("media/texture/ogre_normalmap.png");
 }
 
 void SceneBasic_Uniform::compile()
@@ -84,50 +60,20 @@ void SceneBasic_Uniform::update( float t )
 
 void SceneBasic_Uniform::render()
 {
+    pass1();
+    glFlush();
+    pass2();
+
+
+
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-    
-    //make sure you use the correct name, check your vertex shader
-    //material uniforms
-    prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
-    prog.setUniform("Material.Ks", 0.95f, 0.95f, 0.95f);
-    prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
-    prog.setUniform("Material.Shininess", 180.0f);
-   
-    
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, ogreDiffuse);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, ogreNormal);
-
-    //render ogre model
-    model = mat4(1.0f);
-    model = glm::translate(model, vec3(0.0f, 0.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(45.0f), vec3(0.0f, 1.0f, 0.0f));
-    setMatrices();
-    ogre->render();
-    
-    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, concreteTexture);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, GL_CLEAR);
 
-    //concretes
-    prog.setUniform("Material.Kd", 0.6f, 0.6f, 0.6f);
-    prog.setUniform("Material.Ks", 0.05f, 0.05f, 0.05f);
-    prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
-    prog.setUniform("Material.Shininess", 1.0f);
+
     
-    //render concrete floor
-    model = mat4(1.0f);
-    model = glm::translate(model, vec3(0.0f, -1.45f, 0.0f));
-    setMatrices(); 
-    plane.render();
-
-    setMatrices();
-    torus.render();
 
     
     /*
@@ -184,4 +130,70 @@ void SceneBasic_Uniform::resize(int w, int h)
     projection = glm::perspective(glm::radians(70.0f), (float)w / h, 0.3f, 100.0f);
 }
 
+void SceneBasic_Uniform::setupFBO()
+{
+    glGenFramebuffers(1, &fboHandle);
+    glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
 
+    glGenTextures(1, &renderTex);
+    glBindTexture(GL_TEXTURE_2D, renderTex);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+    // Bind the texture to the FBO
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+        renderTex, 0);
+    // Create the depth buffer
+    GLuint depthBuf;
+    glGenRenderbuffers(1, &depthBuf);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthBuf);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+    // Bind the depth buffer to the FBO
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+        GL_RENDERBUFFER, depthBuf);
+    // Set the targets for the fragment output variables
+    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, drawBuffers);
+    // Unbind the framebuffer, and revert t
+}
+
+void SceneBasic_Uniform::pass1()
+{
+
+
+    //set camera angle and projection
+    view = glm::lookAt(vec3(5.0f, 5.0f, 5.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+    projection = mat4(1.0f);
+
+    //set light position coords
+    vec4 lightPos = vec4(10.0f, 5.0f, 5.0f, 0.0f);
+
+    //light uniforms
+    prog.setUniform("Light.L", 0.1f, 0.1f, 0.1f);
+    prog.setUniform("Light.La", 0.4f, 0.4f, 0.4f);
+    prog.setUniform("Light.LightPosition", lightPos);
+   
+    //concrete
+    prog.setUniform("Material.Kd", 0.6f, 0.6f, 0.6f);
+    prog.setUniform("Material.Ks", 0.05f, 0.05f, 0.05f);
+    prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
+    prog.setUniform("Material.Shininess", 1.0f);
+
+    //render concrete floor
+    model = mat4(1.0f);
+    model = glm::translate(model, vec3(0.0f, -1.45f, 0.0f));
+    setMatrices();
+    plane.render();
+
+    //concretes
+    prog.setUniform("Material.Kd", 0.7f, 0.6f, 0.2f);
+    prog.setUniform("Material.Ks", 0.05f, 0.03f, 0.1f);
+    prog.setUniform("Material.Ka", 0.5f, 0.4f, 0.4f);
+    prog.setUniform("Material.Shininess", 1.0f);
+
+    model = mat4(1.0f);
+    model = glm::translate(model, vec3(0.0f, 0.0f, 0.0f));
+    setMatrices();
+    sun.render();
+}

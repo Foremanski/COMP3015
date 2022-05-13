@@ -1,7 +1,6 @@
 #version 430
 
 //in variable that receives the diffuse calculation from the vertex shader
-in vec3 LightIntensity;
 in vec4 position;
 in vec3 normal;
 
@@ -19,11 +18,11 @@ layout (binding = 1) uniform sampler2D NormalMapTex;
 //light information structure
 uniform struct LightInfo 
 {
-  vec4 LightPosition; 
-  vec3 Ld;      
+  vec4 LightPosition;      
   vec3 La;
-  vec3 Ls;
+  vec3 L;
 } Light;
+
 //material information structure
 uniform struct MaterialInfo 
 {
@@ -33,24 +32,31 @@ uniform struct MaterialInfo
   float shininess;
 } Material;
 //fog structure
-uniform struct FogInfo
-{
-    float MaxDist;
-    float MinDist;
-    vec3 FogColor;
-} Fog;
-//spotlight structure
-uniform struct SpotLightInfo {
-    vec3 SpotPosition;
-    vec3 L;
-    vec3 La;
-    vec3 Direction;
-    float Exponent;
-    float Cutoff;
-} Spot;
 
-vec3 BlinnPhong(vec4 position, vec3 n, int light)
+
+vec3 BlinnPhong(vec4 position, vec3 n)
 {
+    vec3 Ambient = (Material.Ka * Light.La);
+    vec3 s = (Light.LightPosition - (position * Light.LightPosition.w)).xyz;
+    float sDotN = max( dot(s , normal), 0.0 );
+
+    vec3 Diffuse = Material.Kd * sDotN;
+    vec3 Specular = vec3(0.0);
+
+    if(sDotN > 0.0)
+    {
+        vec3 v = normalize(-position.xyz);
+        vec3 h = normalize(v + s);
+        Specular = Material.Ks * pow (max (dot (h,n) , 0.0), Material.shininess);
+    }
+
+
+    //phong calculation
+    return Ambient + Light.L * (Diffuse + Specular);
+     
+
+
+    /*
      //retrieve texture color from texture
      vec3 TexColor = texture(ColorTex, TexCoord).rgb;
      vec4 TexNormal = texture(NormalMapTex, TexCoord);
@@ -83,14 +89,29 @@ vec3 BlinnPhong(vec4 position, vec3 n, int light)
      {
          spotScale = pow(cosAng, Spot.Exponent);
      }            
-          
-     //phong calculation
-     vec3 LightIntensity = Ambient + spotScale + Spot.L * (Diffuse + Specular);
-     return LightIntensity;
+       */   
+     
+     
 }
 
 void main()
 {   
+
+    FragColor = vec4(BlinnPhong(position,normalize(normal)), 1.0f);
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
+
     //calculate fog
     float dist = abs(position.z);
     float fogFactor = (Fog.MaxDist - dist) / (Fog.MaxDist - Fog.MinDist);
@@ -112,6 +133,7 @@ void main()
     //output
     FragColor = vec4(color, 1.0);
     //FragColor = vec4(BlinnPhong(position, normalize(normal), 1), 1.0);
+    */
 }
 
 

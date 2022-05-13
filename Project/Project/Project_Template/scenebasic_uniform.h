@@ -17,19 +17,25 @@
 class SceneBasic_Uniform : public Scene
 {
 private:
+
     GLSLProgram prog;
     
-    std::unique_ptr<ObjMesh> ogre;
     Plane plane;
-    //Sphere sun, planet1, planet2;
-    Torus torus;
+    Sphere sun;
+    //Torus torus;
 
-    GLuint brickTexture, concreteTexture, ogreDiffuse, ogreNormal;
+    GLuint brickTexture, concreteTexture;
 
+
+    GLuint fsQuad, fboHandle, renderTex;
 
     void setMatrices();
 
     void compile();
+
+    void setupFBO();
+    void pass1();
+    void pass2();
 
 public:
     SceneBasic_Uniform();

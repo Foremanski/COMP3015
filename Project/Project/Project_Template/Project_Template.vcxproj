@@ -183,6 +183,8 @@
     <ClInclude Include="scenebasic_uniform.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shader\BloomShader.frag" />
+    <None Include="shader\BloomShader.vert" />
     <None Include="shader\PhongModel.frag" />
     <None Include="shader\PhongModel.vert" />
   </ItemGroup>

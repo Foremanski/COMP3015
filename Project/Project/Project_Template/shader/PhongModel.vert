@@ -3,15 +3,12 @@
 //in variables, this are in model coordinates
 layout (location = 0) in vec3 VertexPosition; 
 layout (location = 1) in vec3 VertexNormal; 
-layout (location = 2) in vec2 VertexTexCoord;
-layout (location = 3) in vec4 VertexTangent;
+
 
 //out vector needed for the fragment shader
-out vec3 LightDir;
-out vec3 ViewDir;
 out vec3 position;
 out vec3 normal;
-out vec2 TexCoord;
+
 
 //uniforms for matrices required in the shader
 uniform mat4 ModelViewMatrix;   //model view matrix
@@ -21,14 +18,23 @@ uniform mat4 MVP;				//model view projection matrix
 
 uniform struct LightInfo 
 {
-  vec4 LightPosition; // Light position
-  vec3 Ld;       // Diffuse light intensity
+  vec4 LightPosition; // Light position 
   vec3 La;       // Ambient Light intensity
-  vec3 Ls;       //sepcular light intensity
+  vec3 L;
 } Light;
  
 void main() 
 { 
+   normal = normalize(NormalMatrix * VertexNormal);
+   position = (ModelViewMatrix * vec4(VertexPosition, 1.0)).xyz;
+
+   gl_Position = MVP * vec4(VertexPosition,1.0);
+
+
+
+
+
+    /*
     //transfrom normal from model coordinates to view coordinates
     normal = normalize(NormalMatrix * VertexNormal);
     vec3 tangent = normalize(NormalMatrix * vec3(VertexTangent));
@@ -51,4 +57,5 @@ void main()
     //turns any vertex position into model view projection in preparations to 
     //graphics pipeline processes before fragment shader (clipping)
     gl_Position = MVP * vec4(VertexPosition,1.0); 
+    */
 } 
