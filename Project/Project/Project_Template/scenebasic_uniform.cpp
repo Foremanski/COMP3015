@@ -15,7 +15,7 @@ using glm::mat4;
 //constructor for teapot
 //teapot(13, glm::translate(mat4(1.0f), vec3(0.0f, 1.5f, 0.25f))) {}
 
-SceneBasic_Uniform::SceneBasic_Uniform() : sun(0.7f,30,30), plane(40.0f, 40.0f, 1, 1) {}
+SceneBasic_Uniform::SceneBasic_Uniform() : sun(0.7f, 30, 30), plane(40.0f, 40.0f, 1, 1) {}
 
 void SceneBasic_Uniform::initScene()
 {
@@ -25,30 +25,32 @@ void SceneBasic_Uniform::initScene()
 
     glEnable(GL_DEPTH_TEST);
 
-    vec3 intense = vec3(0.6f);
+    vec3 intense = vec3(0.3f);
     prog.setUniform("Lights[0].L", intense);
-    prog.setUniform("Lights[1].L", intense);
-    prog.setUniform("Lights[2].L", intense);
+    //prog.setUniform("Lights[1].L", intense);
+    //prog.setUniform("Lights[2].L", intense);
 
-    intense = vec3(0.2f);
+    intense = vec3(3.0f);
     prog.setUniform("Lights[0].La", intense);
-    prog.setUniform("Lights[1].La", intense);
-    prog.setUniform("Lights[2].La", intense);
+    //prog.setUniform("Lights[1].La", intense);
+    //prog.setUniform("Lights[2].La", intense);
 
-    projection = mat4(1.0f);
+    projection = mat4(4.0f);
 
     angle = glm::pi<float>() / 2.0f;
 
+    setupFBO();
+
     // Array for full-screen quad
     GLfloat verts[] = {
-        1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-       -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f
+    -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+    -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f
     };
     GLfloat tc[] = {
-         0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f
+    0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+    0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f
     };
-    setupFBO();
+
 
     // Set up the buffers
     unsigned int handle[2];
@@ -307,26 +309,26 @@ float SceneBasic_Uniform::gauss(float x, float sigma2)
 
 void SceneBasic_Uniform::drawScene()
 {
-    vec3 intense = vec3(1.0f);
+    vec3 intense = vec3(2.0f);
     prog.setUniform("Lights[0].L", intense);
-    prog.setUniform("Lights[1].L", intense);
-    prog.setUniform("Lights[2].L", intense);
+    //prog.setUniform("Lights[1].L", intense);
+    //prog.setUniform("Lights[2].L", intense);
 
     //set light position coords
-    vec4 lightPos = vec4(10.0f, 5.0f, 5.0f, 0.0f);
+    vec4 lightPos = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
-    lightPos.x = -0.0f;
     prog.setUniform("Lights[0].Position", view * lightPos);
-    lightPos.x = 10.0f;
-    prog.setUniform("Lights[1].Position", view * lightPos);
-    lightPos.x = 7.0f;
-    prog.setUniform("Lights[2].Position", view * lightPos);
+    //lightPos.x = 10.0f;
+    //prog.setUniform("Lights[1].Position", view * lightPos);
+    //lightPos.x = 7.0f;
+    //prog.setUniform("Lights[2].Position", view * lightPos);
 
     prog.setUniform("Material.Kd", 0.6f, 0.6f, 0.6f);
     prog.setUniform("Material.Ks", 0.05f, 0.05f, 0.05f);
     prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
     prog.setUniform("Material.Shininess", 1.0f);
 
+    
     //render plane
     model = mat4(1.0f);
     model = glm::translate(model, vec3(0.0f, -1.45f, 0.0f));
@@ -334,10 +336,10 @@ void SceneBasic_Uniform::drawScene()
     plane.render();
 
     //concretes
-    prog.setUniform("Material.Kd", 0.7f, 0.6f, 0.2f);
-    prog.setUniform("Material.Ks", 0.05f, 0.03f, 0.1f);
-    prog.setUniform("Material.Ka", 0.5f, 0.4f, 0.4f);
-    prog.setUniform("Material.Shininess", 1.0f);
+    prog.setUniform("Material.Kd", 0.9f, 0.9f, 0.9f);
+    prog.setUniform("Material.Ks", 0.5f, 0.5f, 0.5f);
+    prog.setUniform("Material.Ka", 0.9f, 0.8f, 0.4f);
+    prog.setUniform("Material.Shininess", 10.0f);
 
     //render sun
     model = mat4(1.0f);
