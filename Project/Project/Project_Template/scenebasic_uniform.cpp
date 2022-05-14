@@ -202,7 +202,7 @@ void SceneBasic_Uniform::pass1()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
-    //set camera angle and projection
+    //set camera  and projection
     view = glm::lookAt(vec3(5.0f, 5.0f, 5.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
     projection = glm::perspective(glm::radians(60.0f), (float)width / height, 0.3f, 100.0f);
 
