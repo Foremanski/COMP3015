@@ -15,13 +15,6 @@ uniform mat4 ModelViewMatrix;   //model view matrix
 uniform mat3 NormalMatrix;		//normal matrix
 uniform mat4 ProjectionMatrix;   // projection matrix
 uniform mat4 MVP;				//model view projection matrix
-
-uniform struct LightInfo 
-{
-  vec4 LightPosition; // Light position 
-  vec3 La;       // Ambient Light intensity
-  vec3 L;
-} Light;
  
 void main() 
 { 

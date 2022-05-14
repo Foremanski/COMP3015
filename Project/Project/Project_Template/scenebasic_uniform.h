@@ -19,31 +19,34 @@ private:
 
     GLSLProgram prog;
 
-    //GLuint brickTexture, concreteTexture;
+    GLuint fsQuad;
+    GLuint hdrFbo, blurFbo;
+    GLuint hdrTex, tex1, tex2;
+    GLuint linearSampler, nearestSampler;
 
-    GLuint hdrFBO;
-    GLuint quad;
-    GLuint hdrTex, avgTex;
+
+    //GLuint brickTexture, concreteTexture;
 
     Plane plane;
     Sphere sun;
     //Torus torus;
 
-    void setMatrices();
+    float angle;
+    int bloomBufWidth, bloomBufHeight;
 
+    void setMatrices();
     void compile();
 
     void setupFBO();
     void pass1();
     void pass2();
-
-    void computeLogAveLuminance();
-    void drawScene();
-
-    /*
     void pass3();
+    void pass4(); 
+    void pass5();
     float gauss(float, float);
-    */
+    void computeLogAveLuminance();
+
+    void drawScene(); 
 
 public:
     SceneBasic_Uniform();
