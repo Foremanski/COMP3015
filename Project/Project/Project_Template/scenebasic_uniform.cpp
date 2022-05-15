@@ -15,13 +15,14 @@ using glm::mat4;
 //constructor for teapot
 //teapot(13, glm::translate(mat4(1.0f), vec3(0.0f, 1.5f, 0.25f))) {}
 
-SceneBasic_Uniform::SceneBasic_Uniform() : sun(0.7f, 30, 30), plane(40.0f, 40.0f, 1, 1) {}
+SceneBasic_Uniform::SceneBasic_Uniform() : sun(0.7f, 30, 30), planet1(0.4f, 30, 30), planet2(0.4f, 30, 30), plane(40.0f, 40.0f, 1, 1) {}
 
 void SceneBasic_Uniform::initScene()
 {
     compile();
 
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    glClearStencil(0);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -41,6 +42,13 @@ void SceneBasic_Uniform::initScene()
 
     setupFBO();
 
+    //SHADOW CALULATION
+    /*
+    renderProg.use();
+    renderProg.setUniform("LightIntensity", vec3(1.0f));
+    */
+    prog.use();
+
     // Array for full-screen quad
     GLfloat verts[] = {
     -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
@@ -50,6 +58,16 @@ void SceneBasic_Uniform::initScene()
     0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
     0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f
     };
+
+    /*
+    GLuint bufHandle;
+    glGenBuffers(1, &bufHandle);
+    glBindBuffer(GL_ARRAY_BUFFER, bufHandle);
+    glBufferData(GL_ARRAY_BUFFER, 4 * 3 * sizeof(GLfloat), verts, GL_STATIC_DRAW);
+    glGenVertexArrays(1, &fsQuad);
+    glBindVertexArray(fsQuad)
+    */
+
 
 
     // Set up the buffers
@@ -74,8 +92,22 @@ void SceneBasic_Uniform::initScene()
 
     glBindVertexArray(0);
 
-    prog.setUniform("LumThresh", 1.7f);
+    //load tex
 
+    prog.setUniform("LumThresh", 1.7f);
+    /*
+    updateLight();
+
+    renderProg.use();
+    renderProg.setUniform("Tex", 2);
+
+    compProg.use();
+    compProg.setUniform("DiffuseSpecTex", 0);
+
+    this->animate(true);
+
+    prog.use();
+    */
     float weights[10], sum, sigma2 = 25.0f;
 
     // Compute and sum the weights
@@ -127,6 +159,7 @@ void SceneBasic_Uniform::initScene()
 
 void SceneBasic_Uniform::setupFBO()
 {
+    
 
     // Create and bind the FBO
     glGenFramebuffers(1, &hdrFbo);
@@ -146,13 +179,28 @@ void SceneBasic_Uniform::setupFBO()
     glGenRenderbuffers(1, &depthBuf);
     glBindRenderbuffer(GL_RENDERBUFFER, depthBuf);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+    /*
+    GLuint ambBuf;
+    glGenRenderbuffers(1, &ambBuf);
+    glBindRenderbuffer(GL_RENDERBUFFER, ambBuf);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 
+    glActiveTexture(GL_TEXTURE0);
+    GLuint diffSpecText;
+    glGenTextures(1, &diffSpecText);
+    glBindTexture(GL_TEXTURE_2D, diffSpecText);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    */
     // Bind the depth buffer to the FBO
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuf);
+    //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, ambBuf);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, diffSpecText, 0);
 
     // Set the targets for the fragment output variables
-    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, drawBuffers);
+    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, drawBuffers);
 
     // Create an FBO for the bright-pass filter and blur
     glGenFramebuffers(1, &blurFbo);
@@ -173,12 +221,21 @@ void SceneBasic_Uniform::setupFBO()
     glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB32F, bloomBufWidth, bloomBufHeight);
 
     // Bind tex1 to the FBO
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex1, 0);
-    glDrawBuffers(1, drawBuffers);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex1, 0);
+    //glDrawBuffers(1, drawBuffers);
+
+    GLenum result = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (result == GL_FRAMEBUFFER_COMPLETE)
+    {
+        printf("FrameBuffer is Complete \n");
+    }
+    else
+    {
+        printf("Framebuffer is not complete \n");
+    }
 
     // Unbind the framebuffer, and revert to default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 }
 
 void SceneBasic_Uniform::render()
@@ -189,16 +246,24 @@ void SceneBasic_Uniform::render()
     pass3();
     pass4();
     pass5();
+    /*
+    glFlush;
+    pass6();
+    glFlush;
+    pass7();
+    glFlush;
+    pass8();
+    */
 }
 
 void SceneBasic_Uniform::pass1()
 {
+    prog.use();
     prog.setUniform("Pass", 1);
-
+   
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glViewport(0, 0, width, height);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, hdrFbo);   
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFbo);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
@@ -206,17 +271,18 @@ void SceneBasic_Uniform::pass1()
     view = glm::lookAt(vec3(5.0f, 5.0f, 5.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
     projection = glm::perspective(glm::radians(60.0f), (float)width / height, 0.3f, 100.0f);
 
-    drawScene();
+    drawScene(prog, false);
 }
 
 //Blur FBO to tex1
 void SceneBasic_Uniform::pass2()
 {
     prog.setUniform("Pass", 2);
+    
     glBindFramebuffer(GL_FRAMEBUFFER, blurFbo);
-
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex1, 0);
     glViewport(0, 0, bloomBufWidth, bloomBufHeight);
+
     glDisable(GL_DEPTH_TEST);
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -224,12 +290,11 @@ void SceneBasic_Uniform::pass2()
     model = mat4(1.0f);
     view = mat4(1.0f);
     projection = mat4(1.0f);
-    setMatrices();
+    setMatrices(prog);
 
     // Render full-screen quad
     glBindVertexArray(fsQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-
 }
 
 //tex 2
@@ -242,6 +307,7 @@ void SceneBasic_Uniform::pass3()
     // Render the full-screen quad
     glBindVertexArray(fsQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
 }
 
 void SceneBasic_Uniform::pass4()
@@ -279,6 +345,73 @@ void SceneBasic_Uniform::pass5()
     glBindSampler(1, nearestSampler);
 
 }
+/*
+//shadow passes
+void SceneBasic_Uniform::pass6()
+{
+    glDepthMask(GL_TRUE);
+    glDisable(GL_STENCIL_TEST);
+    glEnable(GL_DEPTH_TEST);
+
+    renderProg.use();
+    renderProg.setUniform("LightPosition", view * lightPos);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, colorDepthFBO);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    drawScene(renderProg, false);
+}
+
+void SceneBasic_Uniform::pass7()
+{
+    volumeProg.use();
+    volumeProg.setUniform("LightPosition", view * lightPos);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, colorDepthFBO);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBlitFramebuffer(0, 0, width - 1, height - 1, 0, 0, width - 1, height - 1, GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    glDepthMask(GL_FALSE);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glClear(GL_STENCIL_BUFFER_BIT);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS, 0, 0xffff);
+    glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
+    glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
+
+    drawScene(volumeProg, true);
+
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+}
+
+void SceneBasic_Uniform::pass8()
+{
+    glDisable(GL_DEPTH_TEST);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+
+    glStencilFunc(GL_EQUAL, 0, 0xffff);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+    compProg.use();
+
+    model = mat4(1.0f);
+    projection = model;
+    view = model;
+
+    //setMatrices(compProg);
+
+    glBindVertexArray(fsQuad);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glBindVertexArray(0);
+
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+}
+*/
 
 void SceneBasic_Uniform::computeLogAveLuminance()
 {
@@ -306,9 +439,29 @@ float SceneBasic_Uniform::gauss(float x, float sigma2)
     double expon = -(x * x) / (2.0 * sigma2);
     return (float)(coeff * exp(expon));
 }
-
-void SceneBasic_Uniform::drawScene()
+/*
+void SceneBasic_Uniform::updateLight()
 {
+    lightPos = vec4(5.0f * vec3(cosf(angle) * 7.5f, 1.5f, sinf(angle) * 7.5f), 1.0f);
+}
+*/
+void SceneBasic_Uniform::drawScene(GLSLProgram& prog, bool onlyShadowCasters)
+{
+    vec3 color;
+    /*
+    if(onlyShadowCasters)
+    {
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, spotTex);
+        color = vec3(1.0f);
+        prog.setUniform("Ka", color * 0.1f);
+        prog.setUniform("Kd", color);
+        prog.setUniform("Ks", vec3(0.9));
+        prog.setUniform("Shininess", 150.0f);
+    }
+    */
+
+
     vec3 intense = vec3(2.0f);
     prog.setUniform("Lights[0].L", intense);
     //prog.setUniform("Lights[1].L", intense);
@@ -332,20 +485,38 @@ void SceneBasic_Uniform::drawScene()
     //render plane
     model = mat4(1.0f);
     model = glm::translate(model, vec3(0.0f, -1.45f, 0.0f));
-    setMatrices();
+    setMatrices(prog);
     plane.render();
 
     //concretes
     prog.setUniform("Material.Kd", 0.9f, 0.9f, 0.9f);
     prog.setUniform("Material.Ks", 0.5f, 0.5f, 0.5f);
-    prog.setUniform("Material.Ka", 0.9f, 0.8f, 0.4f);
+    prog.setUniform("Material.Ka", 0.7f, 0.6f, 0.4f);
     prog.setUniform("Material.Shininess", 10.0f);
 
     //render sun
     model = mat4(1.0f);
     model = glm::translate(model, vec3(0.0f, 0.0f, 0.0f));
-    setMatrices();
+    setMatrices(prog);
     sun.render();
+
+    //concretes
+    prog.setUniform("Material.Kd", 0.9f, 0.9f, 0.9f);
+    prog.setUniform("Material.Ks", 0.5f, 0.5f, 0.5f);
+    prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.7f);
+    prog.setUniform("Material.Shininess", 10.0f);
+
+    //render planet
+    model = mat4(1.0f);
+    model = glm::translate(model, vec3(3.0f, 0.0f, 0.0f));
+    setMatrices(prog);
+    planet1.render();
+
+    //render planet
+    model = mat4(1.0f);
+    model = glm::translate(model, vec3(0.0f, 0.0f, 3.0f));
+    setMatrices(prog);
+    planet2.render();
 }
 
 void SceneBasic_Uniform::compile()
@@ -353,8 +524,24 @@ void SceneBasic_Uniform::compile()
     try {
         prog.compileShader("shader/BloomShader.vert");
         prog.compileShader("shader/BloomShader.frag");
+        
+        volumeProg.compileShader("shader/ShadowVol.frag");
+        volumeProg.compileShader("shader/ShadowVol.vert");
+        volumeProg.compileShader("shader/ShadowVol.geom");
+        volumeProg.link();
+
+        renderProg.compileShader("shader/ShadowVol_render.frag");
+        renderProg.compileShader("shader/ShadowVol_render.vert");
+        renderProg.link();
+
+        compProg.compileShader("shader/ShadowVol_comp.frag");
+        compProg.compileShader("shader/ShadowVol_comp.vert");
+        compProg.link();
+        
         prog.link();
         prog.use();
+
+        
     }
     catch (GLSLProgramException& e) {
         cerr << e.what() << endl;
@@ -367,7 +554,7 @@ void SceneBasic_Uniform::update(float t)
 
 }
 
-void SceneBasic_Uniform::setMatrices()
+void SceneBasic_Uniform::setMatrices(GLSLProgram& prog)
 {
     mat4 mv = view * model; //we create a model view matrix
 
@@ -383,5 +570,5 @@ void SceneBasic_Uniform::resize(int w, int h)
     glViewport(0, 0, w, h);
     width = w;
     height = h;
-    projection = glm::perspective(glm::radians(70.0f), (float)w / h, 0.3f, 100.0f);
+   // projection = glm::perspective(glm::radians(70.0f), (float)w / h, 0.3f, 100.0f);
 }
