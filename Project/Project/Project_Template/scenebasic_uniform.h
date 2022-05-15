@@ -24,7 +24,12 @@ private:
     GLuint hdrTex, tex1, tex2;
     GLuint linearSampler, nearestSampler;
 
+<<<<<<< HEAD
 
+=======
+    GLuint spotTex;
+    //glm::vec4 lightPos;
+>>>>>>> parent of eb51001... Fixes to shadow volume
     //GLuint brickTexture, concreteTexture;
 
     Plane plane;
@@ -45,6 +50,11 @@ private:
     void pass5();
     float gauss(float, float);
     void computeLogAveLuminance();
+<<<<<<< HEAD
+=======
+    
+    //void updateLight();
+>>>>>>> parent of eb51001... Fixes to shadow volume
 
     void drawScene(); 
 
