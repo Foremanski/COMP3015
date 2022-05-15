@@ -15,29 +15,29 @@ using glm::mat4;
 //constructor for teapot
 //teapot(13, glm::translate(mat4(1.0f), vec3(0.0f, 1.5f, 0.25f))) {}
 
-SceneBasic_Uniform::SceneBasic_Uniform() : time(0), /*sun(0.7f, 30, 30),*/ plane(40.0f, 40.0f, 100, 100), cube(4) {}
+SceneBasic_Uniform::SceneBasic_Uniform() : time(0), /*sun(0.7f, 30, 30),*/ plane(40.0f, 40.0f, 100, 100), cube(1.0f) {}
 
 void SceneBasic_Uniform::initScene()
 {
     compile();
-
+    prog.use();
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
-
-    vec3 intense = vec3(0.8f);
+    
+    vec3 intense = vec3(0.3f);
     prog.setUniform("Lights[0].L", intense);
     //prog.setUniform("Lights[1].L", intense);
     //prog.setUniform("Lights[2].L", intense);
 
-    intense = vec3(0.7f);
+    intense = vec3(3.0f);
     prog.setUniform("Lights[0].La", intense);
     //prog.setUniform("Lights[1].La", intense);
     //prog.setUniform("Lights[2].La", intense);
-
+    
     projection = mat4(4.0f);
 
-    angle = glm::pi<float>() / 2;
+    angle = glm::pi<float>() / 2.0f;
 
     setupFBO();
 
@@ -182,7 +182,6 @@ void SceneBasic_Uniform::setupFBO()
 
 void SceneBasic_Uniform::render()
 {
-    
     pass1();
     computeLogAveLuminance();
     pass2();
@@ -317,43 +316,22 @@ void SceneBasic_Uniform::drawScene()
 {
     prog.use();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    vec3 intense = vec3(2.0f);
 
-    //set camera angle and projection
-    view = glm::lookAt(vec3(5.0f, 5.0f, 5.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
-    projection = glm::perspective(glm::radians(60.0f), (float)width / height, 0.3f, 100.0f);
+    vec4 lightPos = vec4(0.0f, 10.0f, 0.0f, 0.0f);   
+    
 
-    vec3 intense = vec3(0.7f);
-  
-    prog.setUniform("Lights[0].L", intense);
-    //prog.setUniform("Lights[1].L", intense);
-    //prog.setUniform("Lights[2].L", intense);
-
-    //set light position coords
-    vec4 lightPos = vec4(0.0f, 10.0f, 0.0f, 0.0f);
-
-    prog.setUniform("Lights[0].LightPosition", view * lightPos);
-    //lightPos.x = 10.0f;
-    //prog.setUniform("Lights[1].Position", view * lightPos);
-    //lightPos.x = 7.0f;
-    //prog.setUniform("Lights[2].Position", view * lightPos);
-    /*
-    prog.setUniform("Material.Kd", 0.5f, 0.9f, 0.5f);
-    prog.setUniform("Material.Ks", 0.5f, 0.9f, 0.5f);
-    prog.setUniform("Material.Ka", 0.5f, 0.9f, 0.5f);
-    prog.setUniform("Material.Shininess", 100.0f);
-     */
-
+    intense = vec3(0.7f);
     waveProg.use();
-
     waveProg.setUniform("Time", time);
 
-    waveProg.setUniform("Light.LightPosition", view * lightPos);
     waveProg.setUniform("Light.L", intense);
-
-    waveProg.setUniform("Material.Kd", 0.5f, 0.9f, 0.5f);
-    waveProg.setUniform("Material.Ks", 0.5f, 0.9f, 0.5f);
-    waveProg.setUniform("Material.Ka", 0.5f, 0.9f, 0.5f);
+    waveProg.setUniform("Light.La", intense);
+    waveProg.setUniform("Light.LightPosition", view * lightPos);
+    
+    waveProg.setUniform("Material.Kd", 0.3f, 0.3f, 0.9f);
+    waveProg.setUniform("Material.Ks", 0.3f, 0.3f, 0.9f);
+    waveProg.setUniform("Material.Ka", 0.3f, 0.3f, 0.9f);
     waveProg.setUniform("Material.Shininess", 100.0f);
 
     //render plane
@@ -409,6 +387,8 @@ void SceneBasic_Uniform::setMatrices()
     waveProg.setUniform("NormalMatrix", glm::mat3(vec3(mv[0]), vec3(mv[1]), vec3(mv[2]))); //we set the uniform for normal matrix
 
     waveProg.setUniform("MVP", projection * mv); //we set the model view matrix by multiplying the mv with the projection matrix
+
+    prog.use();
 }
 
 void SceneBasic_Uniform::resize(int w, int h)

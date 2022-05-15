@@ -18,15 +18,11 @@ uniform mat3 NormalMatrix;		//normal matrix
 uniform mat4 MVP;				//model view projection matrix
  
 void main() 
-{ 
-	vec4 pos = vec4(VertexPosition, 1.0);
-	
-	vec3 n = vec3(0.0);
-	
-	Position = ModelViewMatrix * pos;
-	Normal = normalize(NormalMatrix * n);
+{ 	
+	Normal = normalize(NormalMatrix * VertexNormal);
+	Position = (ModelViewMatrix * vec4(VertexPosition, 1.0));
 	TexCoord = VertexTexCoord;
 
-	gl_Position = MVP * pos;
+	gl_Position = MVP * vec4(VertexPosition, 1.0);
 
 } 

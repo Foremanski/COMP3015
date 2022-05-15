@@ -104,10 +104,15 @@ vec4 pass2()
 {   
     vec4 val = texture(HdrTex, TexCoord);
 
-    //gradiant in favour of cutoff
-    val.rgb = val.rgb * (luminance(val.rgb) * 2);
+    if( luminance(val.rgb) > LumThresh)
+    {
+        return val;
+    }
     
-    return val;
+    else
+    {
+        return vec4(0.0);
+    }    
 }
 //first blur pass
 vec4 pass3()

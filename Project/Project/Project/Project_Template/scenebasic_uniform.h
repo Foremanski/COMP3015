@@ -25,13 +25,8 @@ private:
     GLuint hdrTex, tex1, tex2;
     GLuint linearSampler, nearestSampler;
 
-
-    //GLuint brickTexture, concreteTexture;
-
     Plane plane;
     Cube cube;
-    //Sphere sun;
-    //Torus torus;
 
     float angle;
     float time;
