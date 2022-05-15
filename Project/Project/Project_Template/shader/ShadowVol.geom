@@ -1,7 +1,7 @@
 #version 430
 
 layout( triangles_adjacency ) in;
-layout ( triangle_strip, max_vertices = 18 ) out;
+layout ( triangles_strip, max_vertices = 18 ) out;
 
 in vec3 VPosition[];
 in vec3 VNormal[];
