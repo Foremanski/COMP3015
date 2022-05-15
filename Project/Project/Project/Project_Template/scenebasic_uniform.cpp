@@ -41,16 +41,6 @@ void SceneBasic_Uniform::initScene()
 
     setupFBO();
 
-<<<<<<< HEAD
-=======
-    //SHADOW CALULATION
-    /*
-    renderProg.use();
-    renderProg.setUniform("LightIntensity", vec3(1.0f));
-    */
-    prog.use();
-
->>>>>>> parent of eb51001... Fixes to shadow volume
     // Array for full-screen quad
     GLfloat verts[] = {
     -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
@@ -85,23 +75,7 @@ void SceneBasic_Uniform::initScene()
     glBindVertexArray(0);
 
     prog.setUniform("LumThresh", 1.7f);
-<<<<<<< HEAD
 
-=======
-    /*
-    updateLight();
-
-    renderProg.use();
-    renderProg.setUniform("Tex", 2);
-
-    compProg.use();
-    compProg.setUniform("DiffuseSpecTex", 0);
-
-    this->animate(true);
-
-    prog.use();
-    */
->>>>>>> parent of eb51001... Fixes to shadow volume
     float weights[10], sum, sigma2 = 25.0f;
 
     // Compute and sum the weights
@@ -172,30 +146,9 @@ void SceneBasic_Uniform::setupFBO()
     glGenRenderbuffers(1, &depthBuf);
     glBindRenderbuffer(GL_RENDERBUFFER, depthBuf);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-<<<<<<< HEAD
 
     // Bind the depth buffer to the FBO
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuf);
-=======
-    /*
-    GLuint ambBuf;
-    glGenRenderbuffers(1, &ambBuf);
-    glBindRenderbuffer(GL_RENDERBUFFER, ambBuf);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-
-    glActiveTexture(GL_TEXTURE0);
-    GLuint diffSpecText;
-    glGenTextures(1, &diffSpecText);
-    glBindTexture(GL_TEXTURE_2D, diffSpecText);
-    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    */
-    // Bind the depth buffer to the FBO
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuf);
-    //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, ambBuf);
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, diffSpecText, 0);
->>>>>>> parent of eb51001... Fixes to shadow volume
 
     // Set the targets for the fragment output variables
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
@@ -249,7 +202,7 @@ void SceneBasic_Uniform::pass1()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
-    //set camera  and projection
+    //set camera angle and projection
     view = glm::lookAt(vec3(5.0f, 5.0f, 5.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
     projection = glm::perspective(glm::radians(60.0f), (float)width / height, 0.3f, 100.0f);
 
@@ -353,35 +306,9 @@ float SceneBasic_Uniform::gauss(float x, float sigma2)
     double expon = -(x * x) / (2.0 * sigma2);
     return (float)(coeff * exp(expon));
 }
-<<<<<<< HEAD
 
 void SceneBasic_Uniform::drawScene()
 {
-=======
-/*
-void SceneBasic_Uniform::updateLight()
-{
-    lightPos = vec4(5.0f * vec3(cosf(angle) * 7.5f, 1.5f, sinf(angle) * 7.5f), 1.0f);
-}
-*/
-void SceneBasic_Uniform::drawScene(GLSLProgram& prog, bool onlyShadowCasters)
-{
-    vec3 color;
-    /*
-    if(onlyShadowCasters)
-    {
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, spotTex);
-        color = vec3(1.0f);
-        prog.setUniform("Ka", color * 0.1f);
-        prog.setUniform("Kd", color);
-        prog.setUniform("Ks", vec3(0.9));
-        prog.setUniform("Shininess", 150.0f);
-    }
-    */
-
-
->>>>>>> parent of eb51001... Fixes to shadow volume
     vec3 intense = vec3(2.0f);
     prog.setUniform("Lights[0].L", intense);
     //prog.setUniform("Lights[1].L", intense);
