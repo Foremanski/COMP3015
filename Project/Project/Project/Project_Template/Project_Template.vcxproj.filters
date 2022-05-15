@@ -133,11 +133,29 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\PhongModel.frag" />
-    <None Include="shader\PhongModel.vert" />
-    <None Include="shader\BlurShader.frag" />
-    <None Include="shader\BlurShader.vert" />
-    <None Include="shader\BloomShader.frag" />
-    <None Include="shader\BloomShader.vert" />
+    <None Include="shader\BloomShader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shader\BloomShader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shader\BlurShader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shader\BlurShader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shader\PhongModel.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shader\PhongModel.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shader\WaveShader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shader\WaveShader.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

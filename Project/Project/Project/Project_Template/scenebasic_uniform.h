@@ -10,6 +10,7 @@
 #include "helper/texture.h"
 #include "helper/plane.h"
 #include "helper/sphere.h"
+#include "helper/cube.h"
 
 #include <glm/glm.hpp>
 
@@ -17,7 +18,7 @@ class SceneBasic_Uniform : public Scene
 {
 private:
 
-    GLSLProgram prog;
+    GLSLProgram prog, waveProg;
 
     GLuint fsQuad;
     GLuint hdrFbo, blurFbo;
@@ -28,10 +29,13 @@ private:
     //GLuint brickTexture, concreteTexture;
 
     Plane plane;
-    Sphere sun;
+    Cube cube;
+    //Sphere sun;
     //Torus torus;
 
     float angle;
+    float time;
+
     int bloomBufWidth, bloomBufHeight;
 
     void setMatrices();

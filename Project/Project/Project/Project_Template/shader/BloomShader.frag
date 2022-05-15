@@ -57,7 +57,11 @@ uniform float AveLum;
 
 float luminance(vec3 color)
 {
-    return  0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;
+    float r = 0.2126;
+    float b = 0.0722;
+    float g = 0.7152;
+
+    return  r * color.r + g * color.g + b * color.b;
 }
 
 vec3 BlinnPhong( vec4 position, vec3 n, int Light)
@@ -100,15 +104,10 @@ vec4 pass2()
 {   
     vec4 val = texture(HdrTex, TexCoord);
 
-    if( luminance(val.rgb) > LumThresh )
-    {
-        return val;
-    }
+    //gradiant in favour of cutoff
+    val.rgb = val.rgb * (luminance(val.rgb) * 2);
     
-    else
-    {
-        return vec4(0.0);
-    }    
+    return val;
 }
 //first blur pass
 vec4 pass3()

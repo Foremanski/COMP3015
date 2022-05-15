@@ -189,6 +189,8 @@
     <None Include="shader\BlurShader.vert" />
     <None Include="shader\PhongModel.frag" />
     <None Include="shader\PhongModel.vert" />
+    <None Include="shader\WaveShader.frag" />
+    <None Include="shader\WaveShader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

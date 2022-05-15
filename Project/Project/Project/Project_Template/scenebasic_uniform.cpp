@@ -15,7 +15,7 @@ using glm::mat4;
 //constructor for teapot
 //teapot(13, glm::translate(mat4(1.0f), vec3(0.0f, 1.5f, 0.25f))) {}
 
-SceneBasic_Uniform::SceneBasic_Uniform() : sun(0.7f, 30, 30), plane(40.0f, 40.0f, 1, 1) {}
+SceneBasic_Uniform::SceneBasic_Uniform() : time(0), /*sun(0.7f, 30, 30),*/ plane(40.0f, 40.0f, 100, 100), cube(4) {}
 
 void SceneBasic_Uniform::initScene()
 {
@@ -25,19 +25,19 @@ void SceneBasic_Uniform::initScene()
 
     glEnable(GL_DEPTH_TEST);
 
-    vec3 intense = vec3(0.3f);
+    vec3 intense = vec3(0.8f);
     prog.setUniform("Lights[0].L", intense);
     //prog.setUniform("Lights[1].L", intense);
     //prog.setUniform("Lights[2].L", intense);
 
-    intense = vec3(3.0f);
+    intense = vec3(0.7f);
     prog.setUniform("Lights[0].La", intense);
     //prog.setUniform("Lights[1].La", intense);
     //prog.setUniform("Lights[2].La", intense);
 
     projection = mat4(4.0f);
 
-    angle = glm::pi<float>() / 2.0f;
+    angle = glm::pi<float>() / 2;
 
     setupFBO();
 
@@ -127,7 +127,6 @@ void SceneBasic_Uniform::initScene()
 
 void SceneBasic_Uniform::setupFBO()
 {
-
     // Create and bind the FBO
     glGenFramebuffers(1, &hdrFbo);
     glBindFramebuffer(GL_FRAMEBUFFER, hdrFbo);
@@ -183,6 +182,7 @@ void SceneBasic_Uniform::setupFBO()
 
 void SceneBasic_Uniform::render()
 {
+    
     pass1();
     computeLogAveLuminance();
     pass2();
@@ -193,6 +193,7 @@ void SceneBasic_Uniform::render()
 
 void SceneBasic_Uniform::pass1()
 {
+    prog.use();
     prog.setUniform("Pass", 1);
 
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -212,6 +213,7 @@ void SceneBasic_Uniform::pass1()
 //Blur FBO to tex1
 void SceneBasic_Uniform::pass2()
 {
+    prog.use();
     prog.setUniform("Pass", 2);
     glBindFramebuffer(GL_FRAMEBUFFER, blurFbo);
 
@@ -235,6 +237,7 @@ void SceneBasic_Uniform::pass2()
 //tex 2
 void SceneBasic_Uniform::pass3()
 {
+    prog.use();
     prog.setUniform("Pass", 3);
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex2, 0);
@@ -246,6 +249,7 @@ void SceneBasic_Uniform::pass3()
 
 void SceneBasic_Uniform::pass4()
 {
+    prog.use();
     prog.setUniform("Pass", 4);
 
     // Write to Tex1
@@ -259,6 +263,7 @@ void SceneBasic_Uniform::pass4()
 //write to the screen
 void SceneBasic_Uniform::pass5()
 {
+    prog.use();
     prog.setUniform("Pass", 5);
 
     // Bind to the default framebuffer, this time we're going to
@@ -282,6 +287,7 @@ void SceneBasic_Uniform::pass5()
 
 void SceneBasic_Uniform::computeLogAveLuminance()
 {
+    prog.use();
     int size = width * height;
     std::vector<GLfloat> texData(size * 3);
 
@@ -309,43 +315,55 @@ float SceneBasic_Uniform::gauss(float x, float sigma2)
 
 void SceneBasic_Uniform::drawScene()
 {
-    vec3 intense = vec3(2.0f);
+    prog.use();
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //set camera angle and projection
+    view = glm::lookAt(vec3(5.0f, 5.0f, 5.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+    projection = glm::perspective(glm::radians(60.0f), (float)width / height, 0.3f, 100.0f);
+
+    vec3 intense = vec3(0.7f);
+  
     prog.setUniform("Lights[0].L", intense);
     //prog.setUniform("Lights[1].L", intense);
     //prog.setUniform("Lights[2].L", intense);
 
     //set light position coords
-    vec4 lightPos = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    vec4 lightPos = vec4(0.0f, 10.0f, 0.0f, 0.0f);
 
-    prog.setUniform("Lights[0].Position", view * lightPos);
+    prog.setUniform("Lights[0].LightPosition", view * lightPos);
     //lightPos.x = 10.0f;
     //prog.setUniform("Lights[1].Position", view * lightPos);
     //lightPos.x = 7.0f;
     //prog.setUniform("Lights[2].Position", view * lightPos);
+    /*
+    prog.setUniform("Material.Kd", 0.5f, 0.9f, 0.5f);
+    prog.setUniform("Material.Ks", 0.5f, 0.9f, 0.5f);
+    prog.setUniform("Material.Ka", 0.5f, 0.9f, 0.5f);
+    prog.setUniform("Material.Shininess", 100.0f);
+     */
 
-    prog.setUniform("Material.Kd", 0.6f, 0.6f, 0.6f);
-    prog.setUniform("Material.Ks", 0.05f, 0.05f, 0.05f);
-    prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
-    prog.setUniform("Material.Shininess", 1.0f);
+    waveProg.use();
 
-    
+    waveProg.setUniform("Time", time);
+
+    waveProg.setUniform("Light.LightPosition", view * lightPos);
+    waveProg.setUniform("Light.L", intense);
+
+    waveProg.setUniform("Material.Kd", 0.5f, 0.9f, 0.5f);
+    waveProg.setUniform("Material.Ks", 0.5f, 0.9f, 0.5f);
+    waveProg.setUniform("Material.Ka", 0.5f, 0.9f, 0.5f);
+    waveProg.setUniform("Material.Shininess", 100.0f);
+
     //render plane
     model = mat4(1.0f);
-    model = glm::translate(model, vec3(0.0f, -1.45f, 0.0f));
+    model = glm::translate(model, vec3(-10.0f, -10.45f, -10.0f));
     setMatrices();
+    waveProg.use();
     plane.render();
 
-    //concretes
-    prog.setUniform("Material.Kd", 0.9f, 0.9f, 0.9f);
-    prog.setUniform("Material.Ks", 0.5f, 0.5f, 0.5f);
-    prog.setUniform("Material.Ka", 0.9f, 0.8f, 0.4f);
-    prog.setUniform("Material.Shininess", 10.0f);
-
-    //render sun
-    model = mat4(1.0f);
-    model = glm::translate(model, vec3(0.0f, 0.0f, 0.0f));
-    setMatrices();
-    sun.render();
+    prog.use();
 }
 
 void SceneBasic_Uniform::compile()
@@ -354,6 +372,11 @@ void SceneBasic_Uniform::compile()
         prog.compileShader("shader/BloomShader.vert");
         prog.compileShader("shader/BloomShader.frag");
         prog.link();
+
+        waveProg.compileShader("shader/WaveShader.vert");
+        waveProg.compileShader("shader/WaveShader.frag");
+        waveProg.link();
+
         prog.use();
     }
     catch (GLSLProgramException& e) {
@@ -364,11 +387,13 @@ void SceneBasic_Uniform::compile()
 
 void SceneBasic_Uniform::update(float t)
 {
-
+    time = t;
 }
 
 void SceneBasic_Uniform::setMatrices()
 {
+    prog.use();
+
     mat4 mv = view * model; //we create a model view matrix
 
     prog.setUniform("ModelViewMatrix", mv); //set the uniform for the model view matrix
@@ -376,6 +401,14 @@ void SceneBasic_Uniform::setMatrices()
     prog.setUniform("NormalMatrix", glm::mat3(vec3(mv[0]), vec3(mv[1]), vec3(mv[2]))); //we set the uniform for normal matrix
 
     prog.setUniform("MVP", projection * mv); //we set the model view matrix by multiplying the mv with the projection matrix
+
+    waveProg.use();
+
+    waveProg.setUniform("ModelViewMatrix", mv); //set the uniform for the model view matrix
+
+    waveProg.setUniform("NormalMatrix", glm::mat3(vec3(mv[0]), vec3(mv[1]), vec3(mv[2]))); //we set the uniform for normal matrix
+
+    waveProg.setUniform("MVP", projection * mv); //we set the model view matrix by multiplying the mv with the projection matrix
 }
 
 void SceneBasic_Uniform::resize(int w, int h)
