@@ -185,15 +185,10 @@
   <ItemGroup>
     <None Include="shader\BloomShader.frag" />
     <None Include="shader\BloomShader.vert" />
+    <None Include="shader\BlurShader.frag" />
+    <None Include="shader\BlurShader.vert" />
     <None Include="shader\PhongModel.frag" />
     <None Include="shader\PhongModel.vert" />
-    <None Include="shader\ShadowVol.frag" />
-    <None Include="shader\ShadowVol.geom" />
-    <None Include="shader\ShadowVol.vert" />
-    <None Include="shader\ShadowVol_comp.frag" />
-    <None Include="shader\ShadowVol_comp.vert" />
-    <None Include="shader\ShadowVol_render.frag" />
-    <None Include="shader\ShadowVol_render.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
