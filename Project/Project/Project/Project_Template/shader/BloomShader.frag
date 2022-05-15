@@ -104,15 +104,10 @@ vec4 pass2()
 {   
     vec4 val = texture(HdrTex, TexCoord);
 
-    if( luminance(val.rgb) > LumThresh)
-    {
-        return val;
-    }
-    
-    else
-    {
-        return vec4(0.0);
-    }    
+    val.rgb = val.rgb * (luminance(val.rgb) * 0.1 );
+   
+   return val;
+      
 }
 //first blur pass
 vec4 pass3()

@@ -15,7 +15,7 @@ using glm::mat4;
 //constructor for teapot
 //teapot(13, glm::translate(mat4(1.0f), vec3(0.0f, 1.5f, 0.25f))) {}
 
-SceneBasic_Uniform::SceneBasic_Uniform() : time(0), /*sun(0.7f, 30, 30),*/ plane(40.0f, 40.0f, 100, 100), cube(1.0f) {}
+SceneBasic_Uniform::SceneBasic_Uniform() : time(0), /*sun(0.7f, 30, 30),*/ plane(40.0f, 40.0f, 100, 100) {}
 
 void SceneBasic_Uniform::initScene()
 {
@@ -30,7 +30,7 @@ void SceneBasic_Uniform::initScene()
     //prog.setUniform("Lights[1].L", intense);
     //prog.setUniform("Lights[2].L", intense);
 
-    intense = vec3(3.0f);
+    intense = vec3(0.2f);
     prog.setUniform("Lights[0].La", intense);
     //prog.setUniform("Lights[1].La", intense);
     //prog.setUniform("Lights[2].La", intense);
@@ -316,12 +316,10 @@ void SceneBasic_Uniform::drawScene()
 {
     prog.use();
 
-    vec3 intense = vec3(2.0f);
-
     vec4 lightPos = vec4(0.0f, 10.0f, 0.0f, 0.0f);   
     
 
-    intense = vec3(0.7f);
+    vec3 intense = vec3(0.7f);
     waveProg.use();
     waveProg.setUniform("Time", time);
 
@@ -329,10 +327,10 @@ void SceneBasic_Uniform::drawScene()
     waveProg.setUniform("Light.La", intense);
     waveProg.setUniform("Light.LightPosition", view * lightPos);
     
-    waveProg.setUniform("Material.Kd", 0.3f, 0.3f, 0.9f);
-    waveProg.setUniform("Material.Ks", 0.3f, 0.3f, 0.9f);
-    waveProg.setUniform("Material.Ka", 0.3f, 0.3f, 0.9f);
-    waveProg.setUniform("Material.Shininess", 100.0f);
+    waveProg.setUniform("Material.Kd", 0.3f, 0.3f, 0.3f);
+    waveProg.setUniform("Material.Ks", 0.3f, 0.3f, 0.3f);
+    waveProg.setUniform("Material.Ka", 0.3f, 0.9f, 0.3f);
+    waveProg.setUniform("Material.Shininess", 10.0f);
 
     //render plane
     model = mat4(1.0f);
