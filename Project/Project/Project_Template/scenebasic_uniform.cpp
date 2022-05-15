@@ -43,10 +43,10 @@ void SceneBasic_Uniform::initScene()
     setupFBO();
 
     //SHADOW CALULATION
-    /*
+    
     renderProg.use();
     renderProg.setUniform("LightIntensity", vec3(1.0f));
-    */
+    
     prog.use();
 
     // Array for full-screen quad
@@ -95,7 +95,7 @@ void SceneBasic_Uniform::initScene()
     //load tex
 
     prog.setUniform("LumThresh", 1.7f);
-    /*
+    
     updateLight();
 
     renderProg.use();
@@ -107,7 +107,7 @@ void SceneBasic_Uniform::initScene()
     this->animate(true);
 
     prog.use();
-    */
+    
     float weights[10], sum, sigma2 = 25.0f;
 
     // Compute and sum the weights
@@ -179,12 +179,12 @@ void SceneBasic_Uniform::setupFBO()
     glGenRenderbuffers(1, &depthBuf);
     glBindRenderbuffer(GL_RENDERBUFFER, depthBuf);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-    /*
+    
     GLuint ambBuf;
     glGenRenderbuffers(1, &ambBuf);
     glBindRenderbuffer(GL_RENDERBUFFER, ambBuf);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-
+    
     glActiveTexture(GL_TEXTURE0);
     GLuint diffSpecText;
     glGenTextures(1, &diffSpecText);
@@ -192,11 +192,13 @@ void SceneBasic_Uniform::setupFBO()
     glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    */
+    
     // Bind the depth buffer to the FBO
+    glGenFramebuffers(1, &colorDepthFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, colorDepthFBO);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuf);
-    //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, ambBuf);
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, diffSpecText, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, ambBuf);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, diffSpecText, 0);
 
     // Set the targets for the fragment output variables
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
@@ -439,16 +441,16 @@ float SceneBasic_Uniform::gauss(float x, float sigma2)
     double expon = -(x * x) / (2.0 * sigma2);
     return (float)(coeff * exp(expon));
 }
-/*
+
 void SceneBasic_Uniform::updateLight()
 {
     lightPos = vec4(5.0f * vec3(cosf(angle) * 7.5f, 1.5f, sinf(angle) * 7.5f), 1.0f);
 }
-*/
+
 void SceneBasic_Uniform::drawScene(GLSLProgram& prog, bool onlyShadowCasters)
 {
     vec3 color;
-    /*
+    
     if(onlyShadowCasters)
     {
         glActiveTexture(GL_TEXTURE2);
@@ -459,7 +461,7 @@ void SceneBasic_Uniform::drawScene(GLSLProgram& prog, bool onlyShadowCasters)
         prog.setUniform("Ks", vec3(0.9));
         prog.setUniform("Shininess", 150.0f);
     }
-    */
+    
 
 
     vec3 intense = vec3(2.0f);

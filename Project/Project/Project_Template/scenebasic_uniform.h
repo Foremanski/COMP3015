@@ -27,7 +27,7 @@ private:
     GLuint linearSampler, nearestSampler;
 
     GLuint spotTex;
-    //glm::vec4 lightPos;
+    glm::vec4 lightPos;
     //GLuint brickTexture, concreteTexture;
 
     Plane plane;
@@ -54,7 +54,7 @@ private:
     float gauss(float, float);
     void computeLogAveLuminance();
     
-    //void updateLight();
+    void updateLight();
 
     void drawScene(GLSLProgram&, bool); 
     
