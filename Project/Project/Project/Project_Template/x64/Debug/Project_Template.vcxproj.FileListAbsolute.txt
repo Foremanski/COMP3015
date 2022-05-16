@@ -1,2 +1,0 @@
-C:\Users\dforeman\Documents\GitHub\COMP3015\Project\Project\Project\Project_Template\x64\Debug\Project_Template.exe
-C:\Users\dforeman\Documents\GitHub\COMP3015\Project\Project\Project\Project_Template\x64\Debug\Project_Template.pdb
