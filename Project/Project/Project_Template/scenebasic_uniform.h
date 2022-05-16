@@ -6,14 +6,10 @@
 #include <glad/glad.h>
 #include "helper/glslprogram.h"
 
-#include "helper/torus.h"
 #include "helper/texture.h"
 #include "helper/plane.h"
-#include "helper/sphere.h"
-#include "helper/cube.h"
 
 #include <glm/glm.hpp>
-
 
 
 class SceneBasic_Uniform : public Scene
@@ -28,9 +24,6 @@ private:
     GLuint linearSampler, nearestSampler;
 
     Plane plane;
-
-    //brick wall texture
-    GLuint brickTexture;
 
     float angle;
     float time;

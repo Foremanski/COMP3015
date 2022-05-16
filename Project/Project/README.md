@@ -1,4 +1,4 @@
-# **COMP3015 - Games Graphics Pipeline C1 Project**
+# **COMP3015 - Games Graphics Pipeline C2 Project: Glowing Wave Tool**
 
 #  Project Settings
 
@@ -7,54 +7,113 @@
 
 # Project Guide
 
-- To run the project, simply run "Project_Template.exe". The render will appear automatically. 
-- To explore the code, click on the "Project_Templace" folder and then open "Project_Template.sln"
+- To run the project, simply run the ".exe" file. The render will automatically play. 
+- To explore the code, click on the "Project_Template" folder and then open "Project_Template.sln"
+
+# Controls
+
+- Q & E - Adjust Wave Speed
+- A & D - Adjust Wave Height
+- Z & C - Adjust Bloom Intensity
+
+- R,G,B - Set wave colour to red, green or blue respectively
 
 # Project Description
 
-This project aims to show a Basic Graphics pipeline primarily using OpenGl and it's extensions:
-- glut
-- glad
-- glsl
+This project aims to be a tool that can be used to set up and control glowing waves. This could be implemented in other
+projects to simulate toxic liquid or other such exotic materials.
 
-Below will be basic descriptions of what the core functions do
+Below will be basic descriptions of what the core functions do:
 
 ## Scenebasic_uniform.h and Scenebasic_uniform.cpp
 
-These files are where the scene is initialised and rendered, calling the various functions of any model loaded. 
+# Scenebasic_uniform.h
+Header files for all of Scenebasic.cpp's functions. 
 
-- The header file **(.h)** includes any rendered object (in my example, an ObjMesh Ogre and 3 Planes) and methods.
+- Private and public methods are declared
+- Private variables generally handle Bloom processing
 
-The **.cpp** file starts with a constructor of all the loaded objects. 
-- **initScene()** will initialise the scene. Setting the position of the camera and projection, as well as the uniforms of the point light, spotlight and the fog
-- **Compile()** loads the vertex shader and Fragment shader
-- **update(float t)** isn't used in this project, but can be used to track actions beyond the initial render. Such as input from the user.
-- **render()** handles the loaded objects. It sets their position, material properties, retrieves and binds their textures and calls their render function
-- **setMatrices()** sets the model view matrix
-- **resize(int w, int h)** will resize the projection according to a width and height input
+- Declares Variables that control the wave's input
+- Declares Variables that are used in Bloom processing
 
-## PhongModel.vert and Phong Model.frag
+# Scenebasic_uniform.cpp
+File that handles the generation of render.
 
-These are the vertex and fragment shaders. 
+#  initScene()
+Handles inital setup of the scene, called only once
 
-The **Vertex Shader** transforms the vertex positions of the objects into a 3d co-ordinate space. It is called once per vertex
-- The layout variables are the in-variables, taking in the properties of a vertex
-- The out variables are then declared, these will be given to the Fragment Shader
-- The unifrms for the model view matrix and light are then given
-- **main()** processes the information, projecting the vertex position using the model view martix with "gl_Position"
+- Compiles the 2 shaders
+- Sets initial variables for Lights, Wave Controls and Wave Materials
+- Computes the weights of Gauss Blur
+- Sets up the frame buffer object (FBO)
+- Provides an array for Full Sceen Quad 
+- Creates Sampler objects for Liniear and Nearest filtering
 
-The **Fragment Shader** defines the RGB values on a pixel by pixel basis. In calculates this value using a BlingPhong shading model and the colour of texture co-ordinates
+# setupFBO()
+- Sets up Frame Buffer Object
+- Creates and binds Depth Buffer
+- Creates and binds a blur FBO for bright pass an blur
 
-- in-variables are declared: Light and material structs are taken in, as well as the appropriate texture for calculation
-- Output is the colour of the pixel
-- **BlinnPhong(vec4 position, vec3 n, int light)** uses the in-variable info to calculate an Ambient, Diffuse and Specular component. Combining that with the texture colour.
-- main() combines a fog calculation, BlingPhong() output, and the texture's normal setting to output the frag colour
 
-## Helper and Media File
+# render()
+
+# Pass1 - Pass5()
+Handles the buffer side of bloom effect
+
+- Pass1() - Draws an inital scene prior to bloom with just blingphong lighting
+- Pass5() - Changes to linear sampling to get extra blur
+
+# computeLogAveLuminance
+Computes the average luminance
+- 
+
+# gauss()
+- returns gaussian blur calculation
+
+# drawScene()
+- sets lighting position and gets lighting intensity from user input
+- sets object position
+- renders the plane object 
+
+# Update() 
+- Handles User Input and setting Time
+
+## BloomShader.vert and BloomShader.frag
+This shader handles the bloom effect.
+
+# The Fragment Shader 
+
+- This handles the 5 passes needed to produce the bloom effect 
+- main() calls each pass using a uniform set within scenebasic_uniform.cpp
+- BlinnPhong Implements a simple BlingPhong Lighting calculation
+
+- Pass1() - gets the pixel color after BlingPhong
+- Pass2() - applies the brightness to the pixel, multiplying the rgb value to increase the luminance
+- Pass3() & Pass4() - Applies the a guassian blur function on a Y axis and X axis
+- Pass5() - handles  tone mapping, converting the pixel's RGB values to XYZ and ensuring the pixel's brightness doesn't exceed 1
+
+# The Vertex Shader 
+
+- Gets the VertexPosition, Normal Value and Texture coordinate
+- Translates that into out vectors for the fragment shader
+- Gives that to the fragment shader
+
+## WaveShader.vert and WaveShader.frag
+
+This shader manipulates the object's vertices to create a wave effect
+
+# The Fragment Shader 
+
+- Implements a simple bling phong function.
+
+# The Vertex Shader 
+
+- The vertex shader implements the main function. 
+- Takes the Y position of plane's current vertex and applies a sin wave to it. Making the vertex go up and down. 
+
+## Helper File
 
 The Helper file contains the basic functions for any objects and textures loaded into the scene, as well as the functions of any extensions such as glsl.
-The Media Folder contains the models and textures used in the project.
+
 
 # Video Link
-
-https://www.youtube.com/watch?v=LOdceG9Zt2o

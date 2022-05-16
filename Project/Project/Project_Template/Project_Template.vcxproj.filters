@@ -139,18 +139,6 @@
     <None Include="shader\BloomShader.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shader\BlurShader.frag">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shader\BlurShader.vert">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shader\PhongModel.frag">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shader\PhongModel.vert">
-      <Filter>shaders</Filter>
-    </None>
     <None Include="shader\WaveShader.frag">
       <Filter>shaders</Filter>
     </None>

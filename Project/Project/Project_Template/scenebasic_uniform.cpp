@@ -50,10 +50,7 @@ void SceneBasic_Uniform::initScene()
 
     VCounter = 0.5f;
     ECounter = 0.35;
-
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, brickTexture);
-
+    ACounter = 0.7;
 
     setupFBO();
 
@@ -135,7 +132,7 @@ void SceneBasic_Uniform::initScene()
     glSamplerParameteri(linearSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     glSamplerParameterfv(linearSampler, GL_TEXTURE_BORDER_COLOR, border);
 
-    // We want nearest sampling except for the last pass.
+    // Nearest Sampling until last pass
     glBindSampler(0, nearestSampler);
     glBindSampler(1, nearestSampler);
     glBindSampler(2, nearestSampler);
@@ -334,10 +331,7 @@ void SceneBasic_Uniform::drawScene()
 
     prog.use();
 
-
     vec4 lightPos = vec4(0.0f, 10.0f, 0.0f, 0.0f);   
-    
-
     vec3 intense = vec3(ECounter);
 
     waveProg.use();
