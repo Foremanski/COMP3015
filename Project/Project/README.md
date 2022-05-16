@@ -115,5 +115,9 @@ This shader manipulates the object's vertices to create a wave effect
 
 The Helper file contains the basic functions for any objects and textures loaded into the scene, as well as the functions of any extensions such as glsl.
 
+## Links
+
+# Github Repo
+https://github.com/Foremanski/COMP3015
 
 # Video Link
